@@ -9,14 +9,30 @@ git clone https://github.com/knu/hs-knu.git ~/.hammerspoon/knu
 ```
 
 ```lua
--- Load all modules
-knu = require("knu.all")
+knu = require("knu")
+-- Function to guard a given object from GC
+guard = knu.runtime.guard
 
--- ...Or just some of them
-knu = {
-  chord = require("knu.chord"),
-  usb = require("knu.usb"),
-}
+-- Enable auto-restart when any of the *.lua files under ~/.hammerspoon/ is modified
+knu.runtime.autorestart(true)
+
+-- Emoji input
+function inputEmoji()
+  local window = hs.window.focusedWindow()
+  knu.emoji.chooser(function (chars)
+      window:focus()
+      if chars then
+        -- Enhanced version of hs.eventtap.keyStrokes() that supports emoji on iTerm2 and Emacs.app
+        knu.keyboard.send(chars)
+      end
+  end):show()
+end
+
+-- Speed up the first invocation
+knu.emoji.preload()
+
+--- z+x+c opens the emoji chooser to input an emoji to the frontmost window
+guard(knu.chord.bind({}, {"z", "x", "c"}, inputEmoji))
 ```
 
 Modules
