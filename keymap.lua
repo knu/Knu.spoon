@@ -5,27 +5,25 @@ local keymap = {}
 -- Keymap is a collection of hotkeys and eventtaps that can be enabled
 -- or disabled all at once.
 keymap.new = function (...)
-  local object = {...}
+  return setmetatable({...}, { __index = keymap })
+end
 
-  function object:add(...)
-    for _, binding in ipairs({...}) do
-      table.insert(self, binding)
-    end
+function keymap:add(...)
+  for _, binding in ipairs({...}) do
+    table.insert(self, binding)
   end
+end
 
-  function object:enable()
-    for _, binding in ipairs(self) do
-      (binding.enable or binding.start)(binding)
-    end
+function keymap:enable()
+  for _, binding in ipairs(self) do
+    (binding.enable or binding.start)(binding)
   end
+end
 
-  function object:disable()
-    for _, binding in ipairs(self) do
-      (binding.disable or binding.stop)(binding)
-    end
+function keymap:disable()
+  for _, binding in ipairs(self) do
+    (binding.disable or binding.stop)(binding)
   end
-
-  return object
 end
 
 local localKeymaps = {}
