@@ -25,6 +25,8 @@ Modules
 - chord.lua: key chord implementation (`SimultaneousKeyPress`
   in [Karabiner](https://pqrs.org/osx/karabiner/))
 
+- emoji.lua: emoji database and chooser
+
 - keyboard.lua: functions to handle input source switching
 
 - keymap.lua: application/window based keymap switching
