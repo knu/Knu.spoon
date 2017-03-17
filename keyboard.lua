@@ -88,7 +88,12 @@ keyboard.switch = function (method, layout)
   end
 end
 
--- Send a string as keyboard input to an application (default: frontmost application)
+-- Send a string as keyboard input to an application (default:
+-- frontmost application)
+--
+-- Some applications cannot handle characters beyond U+FFFF sent via
+-- hs.eventtap.keyStrokes(), so this function uses special methods for
+-- such applications.
 keyboard.send = function (str, application)
   application = application or hs.application.frontmostApplication()
   local appId = application:bundleID()
@@ -103,8 +108,12 @@ keyboard.send = function (str, application)
     ]]):format(str:gsub("([\"\\])", function (c) return "\\" .. c end)))
   elseif appId == "org.gnu.Emacs" then
     for _, cp in utf8.codes(str) do
-      -- C-x 8 RET <codepoint> RET
-      hs.eventtap.keyStrokes(("\x188\r%x\r"):format(cp))
+      if false and cp >= 0x10000 then
+        -- Use C-x 8 RET <codepoint> RET
+        hs.eventtap.keyStrokes(("\x188\r%x\r"):format(cp))
+      else
+        hs.eventtap.keyStrokes(hs.utf8.codepointToUTF8(cp))
+      end
     end
   else
     hs.eventtap.keyStrokes(str)
