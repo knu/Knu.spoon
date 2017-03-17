@@ -24,4 +24,30 @@ runtime.globals = function ()
   return globals
 end
 
+local restarter
+
+-- Enable or disable auto-restart when any of the *.lua files under
+-- ~/.hammerspoon/ is modified
+runtime.autorestart = function (flag)
+  if flag then
+    if restarter == nil then
+      restarter = hs.pathwatcher.new("./",
+        function (files)
+          for _, file in ipairs(files) do
+            if file:find("/[^./][^/]*%.lua$") then
+              knu.runtime.restart()
+              return
+            end
+          end
+        end
+      )
+    end
+    restarter:start()
+  else
+    if restarter then
+      restarter:stop()
+    end
+  end
+end
+
 return runtime
