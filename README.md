@@ -29,6 +29,8 @@ Modules
 
 - keymap.lua: application/window based keymap switching
 
+- runtime.lua: functions like restart() and guard() (from GC)
+
 - usb.lua: wrapper for hs.usb.watcher
 
 - utils.lua: common utility functions
