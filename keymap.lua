@@ -36,7 +36,7 @@ keymap.register = function (matcher, keymap)
     fn = matcher
   elseif type(matcher) == "string" then
     fn = function (w)
-      return w:application():bundleID() == matcher
+      return w ~= nil and w:application():bundleID() == matcher
     end
   end
 
