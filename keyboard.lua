@@ -108,7 +108,7 @@ keyboard.send = function (str, application)
     ]]):format(str:gsub("([\"\\])", function (c) return "\\" .. c end)))
   elseif appId == "org.gnu.Emacs" then
     for _, cp in utf8.codes(str) do
-      if false and cp >= 0x10000 then
+      if cp >= 0x10000 then
         -- Use C-x 8 RET <codepoint> RET
         hs.eventtap.keyStrokes(("\x188\r%x\r"):format(cp))
       else
