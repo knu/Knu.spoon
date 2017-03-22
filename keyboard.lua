@@ -36,8 +36,8 @@ local keyboard = {}
 keyboard.isJapaneseMode = function (sid)
   sid = sid or hs.keycodes.currentSourceID()
 
-  return not sid:find("%.Roman$") and
-    (sid:find("%.Japanese") or sid:find("%.aquaskk%.[^A]"))
+  return sid:find("%.Roman$") == nil and
+    (sid:find("%.Japanese") or sid:find("%.aquaskk%.[^A]")) ~= nil
 end
 
 -- Check if the keyboard is currently in Unicode Hex Input mode
