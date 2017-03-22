@@ -48,17 +48,17 @@ keyboard.isUnicodeHexInputMode = function (sid)
 end
 
 local fnsOnChange = {}
-local prevMethod, prevLayout
+local prevMethod, prevLayout, prevSourceID
 
 hs.keycodes.inputSourceChanged(function ()
-    local method, layout = hs.keycodes.currentMethod(), hs.keycodes.currentLayout()
-    if method == prevMethod and layout == prevLayout then
+    local method, layout, sourceID = hs.keycodes.currentMethod(), hs.keycodes.currentLayout(), hs.keycodes.currentSourceID()
+    if method == prevMethod and layout == prevLayout and sourceID == prevSourceID then
       return
     end
     for _, fn in ipairs(fnsOnChange) do
       fn()
     end
-    prevMethod, prevLayout = method, layout
+    prevMethod, prevLayout, prevSourceID = method, layout, sourceID
 end)
 
 -- Add a input source change handler
