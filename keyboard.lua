@@ -52,7 +52,7 @@ local prevMethod, prevLayout, prevSourceID
 
 hs.keycodes.inputSourceChanged(function ()
     local method, layout, sourceID = hs.keycodes.currentMethod(), hs.keycodes.currentLayout(), hs.keycodes.currentSourceID()
-    if method == prevMethod and layout == prevLayout and sourceID == prevSourceID then
+    if sourceID == prevSourceID and method == prevMethod and layout == prevLayout then
       return
     end
     for _, fn in ipairs(fnsOnChange) do
