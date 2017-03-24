@@ -88,13 +88,14 @@ keyboard.switch = function (method, layout)
   end
 end
 
--- Send a string as keyboard input to an application (default:
--- frontmost application)
+-- Send a string as keyboard input to the frontmost application
 --
--- Some applications cannot handle characters beyond U+FFFF sent via
--- hs.eventtap.keyStrokes(), so this function uses special methods for
--- such applications.
-keyboard.send = function (str, application)
+-- It uses special methods for iTerm2.app and Emacs.app, and uses
+-- hs.eventtap.keyStroke() for other applications.
+--
+-- Attributed text fields do not accept emoji sent via
+-- hs.eventtap.keyStrokes(), so try paste() instead.
+keyboard.send = function (str)
   application = application or hs.application.frontmostApplication()
   local appId = application:bundleID()
 
@@ -118,6 +119,15 @@ keyboard.send = function (str, application)
   else
     hs.eventtap.keyStrokes(str)
   end
+end
+
+-- Paste a string to the frontmost application, temporarily using the
+-- pasteboard
+keyboard.paste = function(str)
+  local data = knu.pasteboard.readAllData()
+  hs.pasteboard.setContents(str)
+  hs.eventtap.keyStroke({"cmd"}, "v")
+  hs.timer.doAfter(0.1, function () knu.pasteboard.writeAllData(data) end)
 end
 
 local uuid = nil
