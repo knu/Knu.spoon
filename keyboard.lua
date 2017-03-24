@@ -129,10 +129,10 @@ keyboard.paste = function(str)
     data = hs.pasteboard.readAllData()
   end
   hs.pasteboard.setContents(str)
-  hs.timer.doAfter(0.1, function ()
+  hs.timer.doAfter(0.2, function ()
       hs.eventtap.keyStroke({"cmd"}, "v")
       if hs.pasteboard.writeAllData then
-        hs.timer.doAfter(0.1, function ()
+        hs.timer.doAfter(0.2, function ()
             hs.pasteboard.writeAllData(data)
         end)
       end
