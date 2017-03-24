@@ -124,10 +124,19 @@ end
 -- Paste a string to the frontmost application, temporarily using the
 -- pasteboard
 keyboard.paste = function(str)
-  local data = knu.pasteboard.readAllData()
+  local data
+  if hs.pasteboard.readAllData then
+    data = hs.pasteboard.readAllData()
+  end
   hs.pasteboard.setContents(str)
-  hs.eventtap.keyStroke({"cmd"}, "v")
-  hs.timer.doAfter(0.1, function () knu.pasteboard.writeAllData(data) end)
+  hs.timer.doAfter(0.1, function ()
+      hs.eventtap.keyStroke({"cmd"}, "v")
+      if hs.pasteboard.writeAllData then
+        hs.timer.doAfter(0.1, function ()
+            hs.pasteboard.writeAllData(data)
+        end)
+      end
+  end)
 end
 
 local uuid = nil
