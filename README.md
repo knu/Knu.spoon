@@ -42,6 +42,22 @@ knu.emoji.preload()
 
 --- z+x+c opens the emoji chooser to input an emoji to the frontmost window
 guard(knu.chord.bind({}, {"z", "x", "c"}, inputEmoji))
+
+
+-- Define some bindings specific to KeePassXC
+knu.keymap.register("org.keepassx.keepassxc", knu.keymap.new(
+    -- I'm not sure why Qt on Mac does not respond to those, but anyway.
+    hs.hotkey.new({"ctrl"}, "h", withRepeat(function ()
+          hs.eventtap.keyStroke({}, "delete", 0)
+    end)),
+    hs.hotkey.new({"ctrl"}, "k", withRepeat(function ()
+          hs.eventtap.keyStroke({"ctrl", "shift"}, "e", 0)
+          hs.eventtap.keyStroke({"cmd"}, "x", 0)
+    end)),
+    hs.hotkey.new({"ctrl"}, "p", withRepeat(function ()
+          hs.eventtap.keyStroke({}, "up", 0)
+    end))
+))
 ```
 
 Modules
