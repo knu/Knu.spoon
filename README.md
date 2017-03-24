@@ -44,6 +44,10 @@ knu.emoji.preload()
 guard(knu.chord.bind({}, {"z", "x", "c"}, inputEmoji))
 
 
+function withRepeat(fn)
+  return fn, nil, fn
+end
+
 -- Define some bindings specific to KeePassXC
 knu.keymap.register("org.keepassx.keepassxc", knu.keymap.new(
     -- I'm not sure why Qt on Mac does not respond to those, but anyway.
