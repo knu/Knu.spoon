@@ -22,8 +22,17 @@ function inputEmoji()
   knu.emoji.chooser(function (chars)
       window:focus()
       if chars then
-        -- Enhanced version of hs.eventtap.keyStrokes() that supports emoji on iTerm2 and Emacs.app
-        knu.keyboard.send(chars)
+        local appId = hs.application.frontmostApplication():bundleID()
+        if appId == "com.googlecode.iterm2" or appId == "org.gnu.Emacs" then
+          -- Enhanced version of hs.eventtap.keyStrokes() that supports emoji on iTerm2 and Emacs.app
+          knu.keyboard.send(chars)
+        elseif appId == "com.twitter.TweetDeck" then
+          -- Loses focus on text field, so just copy and notify
+          hs.pasteboard.setContents(chars)
+          hs.alert.show("Copied! " .. chars)
+        else
+          knu.keyboard.paste(chars)
+        end
       end
   end):show()
 end
