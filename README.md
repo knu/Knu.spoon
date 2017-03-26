@@ -62,6 +62,31 @@ knu.keymap.register("org.keepassx.keepassxc", knu.keymap.new(
           hs.eventtap.keyStroke({}, "up", 0)
     end))
 ))
+
+
+-- Switch between Karabiner-Elements profiles by keyboard
+
+function switchKarabinerElementsProfile(name)
+  hs.execute(knu.utils.shelljoin(
+      "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli",
+      "--select-profile",
+      name
+  ))
+end
+
+knu.usb.onChange(function (device)
+    local name = device.productName
+    if name and (
+        name:find("PS2") or  -- I still use PS/2 Kinesis Keyboard via USB adapter...
+          (not device.vendorName:find("^Apple") and name:find("Keyboard"))
+      ) then
+      if device.eventType == "added" then
+        switchKarabinerElementsProfile("External")
+      else
+        switchKarabinerElementsProfile("Default")
+      end
+    end
+end)
 ```
 
 Modules
