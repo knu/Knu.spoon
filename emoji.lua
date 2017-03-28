@@ -36,13 +36,17 @@ local initializers = {
         for _, alias in ipairs(entry.aliases) do
           table.insert(aliases, ":" .. alias .. ":")
         end
+        local us = chars:gsub(utf8.charpattern, function (char)
+            local cp = utf8.codepoint(char)
+            return ("U+%04X "):format(cp)
+        end):gsub(" $", "")
         table.insert(choices, {
             text = entry.description:gsub("(%l)(%w*)",
               function (c, r)
                 return string.upper(c) .. r
               end
             ),
-            subText = table.concat({
+            subText = us .. ": " .. table.concat({
                 table.unpack(aliases),
                 table.unpack(entry.tags)
             }, ", "),
