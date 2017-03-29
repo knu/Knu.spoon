@@ -36,8 +36,8 @@ local keyboard = {}
 keyboard.isJapaneseMode = function (sid)
   sid = sid or hs.keycodes.currentSourceID()
 
-  return not sid:find("%.Roman$") and
-    (sid:find("%.Japanese") or sid:find("%.aquaskk%.[^A]"))
+  return sid:find("%.Roman$") == nil and
+    (sid:find("%.Japanese") or sid:find("%.aquaskk%.[^A]")) ~= nil
 end
 
 -- Check if the keyboard is currently in Unicode Hex Input mode
@@ -48,17 +48,17 @@ keyboard.isUnicodeHexInputMode = function (sid)
 end
 
 local fnsOnChange = {}
-local prevMethod, prevLayout
+local prevMethod, prevLayout, prevSourceID
 
 hs.keycodes.inputSourceChanged(function ()
-    local method, layout = hs.keycodes.currentMethod(), hs.keycodes.currentLayout()
-    if method == prevMethod and layout == prevLayout then
+    local method, layout, sourceID = hs.keycodes.currentMethod(), hs.keycodes.currentLayout(), hs.keycodes.currentSourceID()
+    if sourceID == prevSourceID and method == prevMethod and layout == prevLayout then
       return
     end
     for _, fn in ipairs(fnsOnChange) do
       fn()
     end
-    prevMethod, prevLayout = method, layout
+    prevMethod, prevLayout, prevSourceID = method, layout, sourceID
 end)
 
 -- Add a input source change handler
@@ -88,17 +88,59 @@ keyboard.switch = function (method, layout)
   end
 end
 
--- Send a string as keyboard input to an application (default:
--- frontmost application)
---
--- Some applications cannot handle characters beyond U+FFFF sent via
--- hs.eventtap.keyStrokes(), so this function uses special methods for
--- such applications.
-keyboard.send = function (str, application)
-  application = application or hs.application.frontmostApplication()
-  local appId = application:bundleID()
+-- A table mapping BundleID to function to paste a string to the
+-- application
+keyboard.pasteFunctions = {
+}
 
-  if appId == "com.googlecode.iterm2" then
+local defaultPaste
+
+if hs.pasteboard.readAllData then
+  defaultPaste = function (str)
+    local data = hs.pasteboard.readAllData()
+    hs.pasteboard.setContents(str)
+    hs.timer.doAfter(0.2, function ()
+        hs.eventtap.keyStroke({"cmd"}, "v")
+        hs.timer.doAfter(0.2, function ()
+            hs.pasteboard.writeAllData(data)
+        end)
+    end)
+  end
+else
+  defaultPaste = function (str)
+    hs.pasteboard.setContents(str)
+    hs.timer.doAfter(0.2, function ()
+        hs.eventtap.keyStroke({"cmd"}, "v")
+    end)
+  end
+end
+
+setmetatable(keyboard.pasteFunctions, {
+    __index = function (_, key)
+      return defaultPaste
+    end
+})
+
+-- Paste a string to the frontmost application, saving the original
+-- content of pasteboard if possible
+keyboard.paste = function(str)
+  keyboard.pasteFunctions[hs.application.frontmostApplication():bundleID()](str)
+end
+
+local function pasteOrSend(str)
+  if str:find("[\xf0-\xfd]") then
+    keyboard.paste(str)
+  else
+    hs.eventtap.keyStrokes(str)
+  end
+end
+
+-- A table mapping BundleID to function to paste a string to the
+-- application, defaulted to hs.eventtap.keyStrokes
+keyboard.sendFunctions = {
+  ["com.apple.Terminal"] = pasteOrSend,
+
+  ["com.googlecode.iterm2"] = function (str)
     hs.osascript.applescript(([[
       tell application "iTerm2"
         tell current session of current window
@@ -106,18 +148,45 @@ keyboard.send = function (str, application)
         end tell
       end tell
     ]]):format(str:gsub("([\"\\])", function (c) return "\\" .. c end)))
-  elseif appId == "org.gnu.Emacs" then
+  end,
+
+  ["org.gnu.Emacs"] = function (str)
     for _, cp in utf8.codes(str) do
-      if false and cp >= 0x10000 then
+      if cp >= 0x10000 then
         -- Use C-x 8 RET <codepoint> RET
         hs.eventtap.keyStrokes(("\x188\r%x\r"):format(cp))
       else
         hs.eventtap.keyStrokes(hs.utf8.codepointToUTF8(cp))
       end
     end
-  else
-    hs.eventtap.keyStrokes(str)
-  end
+  end,
+}
+
+-- setmetatable(keyboard.sendFunctions, {
+--     __index = function (self, key)
+--       return hs.eventtap.keyStrokes
+--     end
+-- })
+
+-- Send a string as keyboard input to the frontmost application
+--
+-- It uses special methods registered in sendFunctions, and uses
+-- hs.eventtap.keyStroke() for other applications.
+--
+-- Attributed text fields do not accept emoji sent via
+-- hs.eventtap.keyStrokes(), so try paste() instead.
+keyboard.send = function (str)
+  local bundleID = hs.application.frontmostApplication():bundleID()
+  local fn = keyboard.sendFunctions[bundleID] or hs.eventtap.keyStrokes
+  fn(str)
+end
+
+-- Send a string if the frostmost application has a known method
+-- registered in sendFunctions, or paste it using paste() otherwise
+keyboard.sendOrPaste = function (str)
+  local bundleID = hs.application.frontmostApplication():bundleID()
+  local fn = keyboard.sendFunctions[bundleID] or keyboard.pasteFunctions[bundleID]
+  fn(str)
 end
 
 local uuid = nil
