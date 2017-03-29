@@ -93,26 +93,28 @@ end
 keyboard.pasteFunctions = {
 }
 
-local defaultPaste
+local savePB
 
 if hs.pasteboard.readAllData then
-  defaultPaste = function (str)
+  savePB = function (delay)
     local data = hs.pasteboard.readAllData()
-    hs.pasteboard.setContents(str)
-    hs.timer.doAfter(0.2, function ()
-        hs.eventtap.keyStroke({"cmd"}, "v")
-        hs.timer.doAfter(0.2, function ()
-            hs.pasteboard.writeAllData(data)
-        end)
-    end)
+    return function ()
+      hs.timer.doAfter(delay or 0.2, function ()
+          hs.pasteboard.writeAllData(data)
+      end)
+    end
   end
 else
-  defaultPaste = function (str)
-    hs.pasteboard.setContents(str)
-    hs.timer.doAfter(0.2, function ()
-        hs.eventtap.keyStroke({"cmd"}, "v")
-    end)
+  savePB = function (delay)
+    return function () end
   end
+end
+
+local function defaultPaste(str)
+  local restorePB = savePB()
+  hs.pasteboard.setContents(str)
+  hs.eventtap.keyStroke({"cmd"}, "v")
+  restorePB()
 end
 
 setmetatable(keyboard.pasteFunctions, {
@@ -123,6 +125,10 @@ setmetatable(keyboard.pasteFunctions, {
 
 -- Paste a string to the frontmost application, saving the original
 -- content of pasteboard if possible
+--
+-- This function should not be called more than one time from a
+-- function, because it posts an event.  Use hs.timer.doAfter() if you
+-- need to.
 keyboard.paste = function(str)
   keyboard.pasteFunctions[hs.application.frontmostApplication():bundleID()](str)
 end
@@ -162,30 +168,20 @@ keyboard.sendFunctions = {
   end,
 }
 
--- setmetatable(keyboard.sendFunctions, {
---     __index = function (self, key)
---       return hs.eventtap.keyStrokes
---     end
--- })
-
 -- Send a string as keyboard input to the frontmost application
 --
 -- It uses special methods registered in sendFunctions, and uses
 -- hs.eventtap.keyStroke() for other applications.
 --
+-- An optional parameter fallback, defaulted to
+-- hs.eventtap.keyStrokes, specifies the function to use when
+-- sendFunction does not have a method for the application.
+--
 -- Attributed text fields do not accept emoji sent via
 -- hs.eventtap.keyStrokes(), so try paste() instead.
-keyboard.send = function (str)
+keyboard.send = function (str, fallback)
   local bundleID = hs.application.frontmostApplication():bundleID()
-  local fn = keyboard.sendFunctions[bundleID] or hs.eventtap.keyStrokes
-  fn(str)
-end
-
--- Send a string if the frostmost application has a known method
--- registered in sendFunctions, or paste it using paste() otherwise
-keyboard.sendOrPaste = function (str)
-  local bundleID = hs.application.frontmostApplication():bundleID()
-  local fn = keyboard.sendFunctions[bundleID] or keyboard.pasteFunctions[bundleID]
+  local fn = keyboard.sendFunctions[bundleID] or fallback or hs.eventtap.keyStrokes
   fn(str)
 end
 

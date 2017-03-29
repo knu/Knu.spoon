@@ -28,8 +28,9 @@ function inputEmoji()
           hs.pasteboard.setContents(chars)
           hs.alert.show("Copied! " .. chars)
         else
-          -- sendOrPaste uses an appropriate method for the frontmost application to send a text
-          knu.keyboard.sendOrPaste(chars)
+          -- knu.keyboard.send uses an appropriate method for the frontmost application to send a text
+          -- knu.keyboard.paste pastes a string to the frontmost application, which is specified as a fallback function here
+          knu.keyboard.send(chars, knu.keyboard.paste)
         end
       end
   end):show()
