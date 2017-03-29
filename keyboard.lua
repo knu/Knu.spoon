@@ -181,6 +181,14 @@ keyboard.send = function (str)
   fn(str)
 end
 
+-- Send a string if the frostmost application has a known method
+-- registered in sendFunctions, or paste it using paste() otherwise
+keyboard.sendOrPaste = function (str)
+  local bundleID = hs.application.frontmostApplication():bundleID()
+  local fn = keyboard.sendFunctions[bundleID] or keyboard.pasteFunctions[bundleID]
+  fn(str)
+end
+
 local uuid = nil
 local shown = nil
 
