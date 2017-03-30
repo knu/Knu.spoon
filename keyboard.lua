@@ -88,18 +88,65 @@ keyboard.switch = function (method, layout)
   end
 end
 
--- Send a string as keyboard input to the frontmost application
---
--- It uses special methods for iTerm2.app and Emacs.app, and uses
--- hs.eventtap.keyStroke() for other applications.
---
--- Attributed text fields do not accept emoji sent via
--- hs.eventtap.keyStrokes(), so try paste() instead.
-keyboard.send = function (str)
-  application = application or hs.application.frontmostApplication()
-  local appId = application:bundleID()
+-- A table mapping BundleID to function to paste a string to the
+-- application
+keyboard.pasteFunctions = {
+}
 
-  if appId == "com.googlecode.iterm2" then
+local savePB
+
+if hs.pasteboard.readAllData then
+  savePB = function (delay)
+    local data = hs.pasteboard.readAllData()
+    return function ()
+      hs.timer.doAfter(delay or 0.2, function ()
+          hs.pasteboard.writeAllData(data)
+      end)
+    end
+  end
+else
+  savePB = function (delay)
+    return function () end
+  end
+end
+
+local function defaultPaste(str)
+  local restorePB = savePB()
+  hs.pasteboard.setContents(str)
+  hs.eventtap.keyStroke({"cmd"}, "v")
+  restorePB()
+end
+
+setmetatable(keyboard.pasteFunctions, {
+    __index = function (_, key)
+      return defaultPaste
+    end
+})
+
+-- Paste a string to the frontmost application, saving the original
+-- content of pasteboard if possible
+--
+-- This function should not be called more than one time from a
+-- function, because it posts an event.  Use hs.timer.doAfter() if you
+-- need to.
+keyboard.paste = function(str)
+  keyboard.pasteFunctions[hs.application.frontmostApplication():bundleID()](str)
+end
+
+local function pasteOrSend(str)
+  if str:find("[\xf0-\xfd]") then
+    keyboard.paste(str)
+  else
+    hs.eventtap.keyStrokes(str)
+  end
+end
+
+-- A table mapping BundleID to function to paste a string to the
+-- application, defaulted to hs.eventtap.keyStrokes
+keyboard.sendFunctions = {
+  ["com.apple.Terminal"] = pasteOrSend,
+
+  ["com.googlecode.iterm2"] = function (str)
     hs.osascript.applescript(([[
       tell application "iTerm2"
         tell current session of current window
@@ -107,7 +154,9 @@ keyboard.send = function (str)
         end tell
       end tell
     ]]):format(str:gsub("([\"\\])", function (c) return "\\" .. c end)))
-  elseif appId == "org.gnu.Emacs" then
+  end,
+
+  ["org.gnu.Emacs"] = function (str)
     for _, cp in utf8.codes(str) do
       if cp >= 0x10000 then
         -- Use C-x 8 RET <codepoint> RET
@@ -116,27 +165,24 @@ keyboard.send = function (str)
         hs.eventtap.keyStrokes(hs.utf8.codepointToUTF8(cp))
       end
     end
-  else
-    hs.eventtap.keyStrokes(str)
-  end
-end
+  end,
+}
 
--- Paste a string to the frontmost application, temporarily using the
--- pasteboard
-keyboard.paste = function(str)
-  local data
-  if hs.pasteboard.readAllData then
-    data = hs.pasteboard.readAllData()
-  end
-  hs.pasteboard.setContents(str)
-  hs.timer.doAfter(0.2, function ()
-      hs.eventtap.keyStroke({"cmd"}, "v")
-      if hs.pasteboard.writeAllData then
-        hs.timer.doAfter(0.2, function ()
-            hs.pasteboard.writeAllData(data)
-        end)
-      end
-  end)
+-- Send a string as keyboard input to the frontmost application
+--
+-- It uses special methods registered in sendFunctions, and uses
+-- hs.eventtap.keyStroke() for other applications.
+--
+-- An optional parameter fallback, defaulted to
+-- hs.eventtap.keyStrokes, specifies the function to use when
+-- sendFunction does not have a method for the application.
+--
+-- Attributed text fields do not accept emoji sent via
+-- hs.eventtap.keyStrokes(), so try paste() instead.
+keyboard.send = function (str, fallback)
+  local bundleID = hs.application.frontmostApplication():bundleID()
+  local fn = keyboard.sendFunctions[bundleID] or fallback or hs.eventtap.keyStrokes
+  fn(str)
 end
 
 local uuid = nil

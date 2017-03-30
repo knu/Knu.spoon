@@ -23,15 +23,14 @@ function inputEmoji()
       window:focus()
       if chars then
         local appId = hs.application.frontmostApplication():bundleID()
-        if appId == "com.googlecode.iterm2" or appId == "org.gnu.Emacs" then
-          -- Enhanced version of hs.eventtap.keyStrokes() that supports emoji on iTerm2 and Emacs.app
-          knu.keyboard.send(chars)
-        elseif appId == "com.twitter.TweetDeck" then
-          -- Loses focus on text field, so just copy and notify
+        if appId == "com.twitter.TweetDeck" then
+          -- TweetDeck does not restore focus on text field, so just copy and notify user
           hs.pasteboard.setContents(chars)
           hs.alert.show("Copied! " .. chars)
         else
-          knu.keyboard.paste(chars)
+          -- knu.keyboard.send uses an appropriate method for the frontmost application to send a text
+          -- knu.keyboard.paste pastes a string to the frontmost application, which is specified as a fallback function here
+          knu.keyboard.send(chars, knu.keyboard.paste)
         end
       end
   end):show()
