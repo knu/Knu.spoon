@@ -4,6 +4,8 @@ hs-knu modules
 Usage
 -----
 
+### Install
+
 ```
 git clone https://github.com/knu/hs-knu.git ~/.hammerspoon/knu
 ```
@@ -15,8 +17,11 @@ guard = knu.runtime.guard
 
 -- Enable auto-restart when any of the *.lua files under ~/.hammerspoon/ is modified
 knu.runtime.autorestart(true)
+```
 
--- Emoji input
+### Example: emoji input and key chord
+
+```lua
 function inputEmoji()
   local window = hs.window.focusedWindow()
   knu.emoji.chooser(function (chars)
@@ -41,8 +46,11 @@ knu.emoji.preload()
 
 --- z+x+c opens the emoji chooser to input an emoji to the frontmost window
 guard(knu.chord.bind({}, {"z", "x", "c"}, inputEmoji))
+```
 
+### Example: application specific keymap
 
+```lua
 function withRepeat(fn)
   return fn, nil, fn
 end
@@ -61,8 +69,11 @@ knu.keymap.register("org.keepassx.keepassxc", knu.keymap.new(
           hs.eventtap.keyStroke({}, "up", 0)
     end))
 ))
+```
 
+### Example: USB watcher and shell escaping
 
+```lua
 -- Switch between Karabiner-Elements profiles by keyboard
 
 function switchKarabinerElementsProfile(name)
