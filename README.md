@@ -4,6 +4,8 @@ hs-knu modules
 Usage
 -----
 
+### Install
+
 ```
 git clone https://github.com/knu/hs-knu.git ~/.hammerspoon/knu
 ```
@@ -15,23 +17,25 @@ guard = knu.runtime.guard
 
 -- Enable auto-restart when any of the *.lua files under ~/.hammerspoon/ is modified
 knu.runtime.autorestart(true)
+```
 
--- Emoji input
+### Example: emoji input and key chord
+
+```lua
 function inputEmoji()
   local window = hs.window.focusedWindow()
   knu.emoji.chooser(function (chars)
       window:focus()
       if chars then
         local appId = hs.application.frontmostApplication():bundleID()
-        if appId == "com.googlecode.iterm2" or appId == "org.gnu.Emacs" then
-          -- Enhanced version of hs.eventtap.keyStrokes() that supports emoji on iTerm2 and Emacs.app
-          knu.keyboard.send(chars)
-        elseif appId == "com.twitter.TweetDeck" then
-          -- Loses focus on text field, so just copy and notify
+        if appId == "com.twitter.TweetDeck" then
+          -- TweetDeck does not restore focus on text field, so just copy and notify user
           hs.pasteboard.setContents(chars)
           hs.alert.show("Copied! " .. chars)
         else
-          knu.keyboard.paste(chars)
+          -- knu.keyboard.send uses an appropriate method for the frontmost application to send a text
+          -- knu.keyboard.paste pastes a string to the frontmost application, which is specified as a fallback function here
+          knu.keyboard.send(chars, knu.keyboard.paste)
         end
       end
   end):show()
@@ -42,8 +46,11 @@ knu.emoji.preload()
 
 --- z+x+c opens the emoji chooser to input an emoji to the frontmost window
 guard(knu.chord.bind({}, {"z", "x", "c"}, inputEmoji))
+```
 
+### Example: application specific keymap
 
+```lua
 function withRepeat(fn)
   return fn, nil, fn
 end
@@ -62,8 +69,11 @@ knu.keymap.register("org.keepassx.keepassxc", knu.keymap.new(
           hs.eventtap.keyStroke({}, "up", 0)
     end))
 ))
+```
 
+### Example: USB watcher and shell escaping
 
+```lua
 -- Switch between Karabiner-Elements profiles by keyboard
 
 function switchKarabinerElementsProfile(name)
