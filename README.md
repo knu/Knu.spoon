@@ -55,9 +55,8 @@ function withRepeat(fn)
   return fn, nil, fn
 end
 
--- Define some bindings specific to KeePassXC
-knu.keymap.register("org.keepassx.keepassxc", knu.keymap.new(
-    -- I'm not sure why Qt on Mac does not respond to those, but anyway.
+-- Define some bindings for specific applications
+local keymapForQt = knu.keymap.new(
     hs.hotkey.new({"ctrl"}, "h", withRepeat(function ()
           hs.eventtap.keyStroke({}, "delete", 0)
     end)),
@@ -65,10 +64,15 @@ knu.keymap.register("org.keepassx.keepassxc", knu.keymap.new(
           hs.eventtap.keyStroke({"ctrl", "shift"}, "e", 0)
           hs.eventtap.keyStroke({"cmd"}, "x", 0)
     end)),
+    hs.hotkey.new({"ctrl"}, "n", withRepeat(function ()
+          hs.eventtap.keyStroke({}, "down", 0)
+    end)),
     hs.hotkey.new({"ctrl"}, "p", withRepeat(function ()
           hs.eventtap.keyStroke({}, "up", 0)
     end))
-))
+)
+knu.keymap.register("org.keepassx.keepassxc", keymapForQt)
+knu.keymap.register("jp.naver.line.mac", keymapForQt)
 ```
 
 ### Example: USB watcher and shell escaping
