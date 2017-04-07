@@ -106,7 +106,16 @@ if hs.pasteboard.readAllData then
   end
 else
   savePB = function (delay)
-    return function () end
+    local data = hs.pasteboard.readImage(true) or
+      hs.pasteboard.readSound(true) or
+      hs.pasteboard.readStyledText(true) or
+      hs.pasteboard.readURL(true) or
+      hs.pasteboard.readColor(true)
+    return function ()
+      hs.timer.doAfter(delay or 0.2, function ()
+          hs.pasteboard.writeObjects(data)
+      end)
+    end
   end
 end
 
