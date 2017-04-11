@@ -128,6 +128,33 @@ knu.usb.onChange(function (device)
 end)
 ```
 
+### Example: Enhanced application watcher
+
+```lua
+-- Enable hotkey for launching an app only while not running
+function launchByHotkeyWhileNotRunning(mods, key, bundleID)
+  local hotkey = hs.hotkey.new(mods, key, function ()
+      hs.application.open(bundleID)
+  end)
+
+  -- Writing an application watcher for a specific application made
+  -- easy by knu.application.onChange()
+  knu.application.onChange(bundleID, function (name, type, app)
+      if type == hs.application.watcher.launched then
+        hotkey:disable()
+      elseif type == hs.application.watcher.terminated then
+        hotkey:enable()
+      end
+  end, true)
+end
+
+-- Suppose you have set up system-wide hotkeys for activating apps in
+-- their preferences, but also want to launch them if they are not
+-- running.
+launchByHotkeyWhileNotRunning({"alt", "ctrl"}, "/", "com.kapeli.dashdoc")
+launchByHotkeyWhileNotRunning({"alt", "ctrl"}, "t", "com.googlecode.iterm2")
+```
+
 Modules
 -------
 
