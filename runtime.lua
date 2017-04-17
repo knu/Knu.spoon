@@ -20,6 +20,17 @@ runtime.guard = function (object)
   return object
 end
 
+-- Unguards a guarded object
+runtime.unguard = function (object)
+  for i, tuple in ipairs(globals) do
+    if tuple.object == object then
+      table.remove(globals, i)
+      break
+    end
+  end
+  return object
+end
+
 runtime.globals = function ()
   return globals
 end
