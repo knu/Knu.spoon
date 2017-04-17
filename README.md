@@ -19,6 +19,29 @@ guard = knu.runtime.guard
 knu.runtime.autorestart(true)
 ```
 
+### Example: pseudo hotkeys
+
+```lua
+knu.photkey.bind({"fn"}, "l", function ()
+    -- Wait a second to skip an inevitable key-up event
+    hs.timer.doAfter(1.0, function () hs.application.launchOrFocus("ScreenSaverEngine") end)
+end)
+```
+
+```lua
+knu.photkey.bind({"leftshift", "rightshift"}, "l", function ()
+    -- This is invoked with both shift keys down + L
+    hs.eventtap.keyStrokes("LGTM!\n")
+end)
+```
+
+```lua
+knu.photkey.bind({"rightcmd", "shift"}, "q", function ()
+    -- This is invoked with left command + shift (left or right) + Q
+    hs.execute(("kill %d"):format(hs.application.frontmostApplication():pid()))
+end)
+```
+
 ### Example: emoji input and key chord
 
 ```lua
@@ -166,6 +189,8 @@ Modules
 - keyboard.lua: functions to handle input source switching
 
 - keymap.lua: application/window based keymap switching
+
+- photkey.lua: pseudo hotkeys with extended modifiers support
 
 - runtime.lua: functions like restart() and guard() (from GC)
 
