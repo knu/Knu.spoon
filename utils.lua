@@ -15,7 +15,7 @@ local modToBit = {
   ["fn"] = 16,
 }
 
--- Convert a table of modifiers to an integer
+-- Converts a table of modifiers to an integer
 utils.modifierFlags = function (mods)
   local flags = 0
   for key, value in pairs(mods) do
@@ -64,7 +64,7 @@ keyTopMap["pad/"] = "/︎⃣"
 keyTopMap["pad-"] = "-︎⃣"
 keyTopMap["pad="] = "=︎⃣"
 
--- Return a pretty representation of a key
+-- Returns a pretty representation of a key
 utils.prettyKey = function (mods, key)
   local flags = utils.modifierFlags(mods)
   local fn, cmd, alt, ctrl, shift, k
@@ -95,7 +95,7 @@ utils.prettyKey = function (mods, key)
   return table.concat({fn or "", cmd or "", alt or "", ctrl or "", shift or "", keytop})
 end
 
--- Escape a string for the shell
+-- Escapes a string for the shell
 utils.shellescape = function (s)
   if s == "" then
     return "''"
@@ -104,8 +104,8 @@ utils.shellescape = function (s)
   return s:gsub("([^A-Za-z0-9_%-.,:/@\n])", "\\%1"):gsub("(\n)", "'\n'")
 end
 
--- Join a table of arguments into a command line string, escaping each
--- element for the shell
+-- Joins a table of arguments into a command line string, escaping
+-- each element for the shell
 utils.shelljoin = function (...)
   local args = {...}
   local s = ""

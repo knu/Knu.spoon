@@ -205,7 +205,7 @@ keyboard.alertStyle = {
   radius = 9
 }
 
--- Show a given string as input mode
+-- Shows a given string as input mode
 keyboard.showInputMode = function (s, duration)
   duration = duration or 0.5
   if s == shown then
@@ -218,7 +218,7 @@ keyboard.showInputMode = function (s, duration)
   shown = s
 end
 
--- Show the current input mode
+-- Shows the current input mode
 keyboard.showCurrentInputMode = function (sid, duration)
   if type(sid) == "number" then
     sid, duration = nil, sid

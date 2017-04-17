@@ -1,6 +1,6 @@
 local runtime = {}
 
--- Restart Hammerspoon (calling hs.reload())
+-- Restarts Hammerspoon (calling hs.reload())
 runtime.restart = function (message)
   hs.alert.show(message or "Restarting Hammerspoon...")
   -- Give some time for alert to show up before reloading
@@ -9,7 +9,7 @@ end
 
 local globals = {}
 
--- Guard an object from garbage collection
+-- Guards an object from garbage collection
 runtime.guard = function (object)
   local caller = debug.getinfo(2)
   table.insert(globals, {
@@ -26,7 +26,7 @@ end
 
 local restarter
 
--- Enable or disable auto-restart when any of the *.lua files under
+-- Enables or disable auto-restart when any of the *.lua files under
 -- ~/.hammerspoon/ is modified
 runtime.autorestart = function (flag)
   if flag then

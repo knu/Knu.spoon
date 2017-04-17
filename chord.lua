@@ -5,7 +5,7 @@ local keyUp = hs.eventtap.event.types.keyUp
 
 local utils = require((...):gsub("[^.]+$", "utils"))
 
--- Create an eventtap that responds to a key chord
+-- Creates an eventtap that responds to a key chord
 chord.new = function (mods, keys, fn, threshold)
   threshold = threshold or 0.05
 

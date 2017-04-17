@@ -1,6 +1,6 @@
 local keymap = {}
 
--- Create a keymap
+-- Creates a new keymap
 --
 -- Keymap is a collection of hotkeys and eventtaps that can be enabled
 -- or disabled all at once.
@@ -28,8 +28,8 @@ end
 
 local localKeymaps = {}
 
--- Register a keymap that is only enabled in the application specified
--- by a bundle ID or windows that satisfy a function
+-- Registers a keymap that is only enabled in the application
+-- specified by a bundle ID or windows that satisfy a function
 keymap.register = function (matcher, keymap)
   local fn
   if type(matcher) == "function" then
@@ -57,7 +57,7 @@ keymap.register = function (matcher, keymap)
   return keymap
 end
 
--- Unregister a registered keymap
+-- Unregisters a registered keymap
 keymap.unregister = function (matcher, keymap)
   local keymaps = localKeymaps[matcher]
   if keymaps then
