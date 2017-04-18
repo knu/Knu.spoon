@@ -70,8 +70,8 @@ setmetatable(emoji, {
     end
 })
 
--- Create a chooser with a given callback, which will be called with a
--- selected emoji, or nil if canceled.
+-- Creates a chooser with a given callback, which will be called with
+-- a selected emoji, or nil if canceled.
 emoji.chooser = function (fn)
   local chooser = hs.chooser.new(function (choice)
       if choice then
@@ -86,7 +86,7 @@ emoji.chooser = function (fn)
   return chooser
 end
 
--- Preload the table and choices
+-- Preloads the table and choices
 emoji.preload = function ()
   local _ = emoji.choices
   return true

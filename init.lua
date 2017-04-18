@@ -18,7 +18,7 @@ setmetatable(knu, {
     end
 })
 
--- Preload all or some submodules
+-- Preloads all or some submodules
 knu.preload = function (...)
   local modules = {...}
 

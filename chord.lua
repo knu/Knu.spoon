@@ -4,8 +4,42 @@ local keyDown = hs.eventtap.event.types.keyDown
 local keyUp = hs.eventtap.event.types.keyUp
 
 local utils = require((...):gsub("[^.]+$", "utils"))
+local runtime = require((...):gsub("[^.]+$", "runtime"))
 
--- Create an eventtap that responds to a key chord
+chord.methods = {
+  -- Provide hotkey compatible API for convenience
+  enable = function (self)
+    return self:start()
+  end,
+
+  disable = function (self)
+    return self:stop()
+  end,
+
+  delete = function (self)
+    return runtime.unguard(self:stop())
+  end,
+}
+
+local meta = {
+  __index = function (self, key)
+    local tap = self.tap
+    local value = chord.methods[key] or tap[key]
+    if type(value) == "function" then
+      return function (self, ...)
+        local ret = value(tap, ...)
+        if ret == tap then
+          return self
+        end
+        return ret
+      end
+    else
+      return value
+    end
+  end
+}
+
+-- Creates an eventtap that responds to a key chord
 chord.new = function (mods, keys, fn, threshold)
   threshold = threshold or 0.05
 
@@ -96,7 +130,7 @@ chord.new = function (mods, keys, fn, threshold)
     end
   end
 
-  return hs.eventtap.new(
+  local tap = hs.eventtap.new(
     {
       keyDown,
       keyUp,
@@ -142,6 +176,8 @@ chord.new = function (mods, keys, fn, threshold)
       return true, es
     end
   )
+
+  return runtime.guard(setmetatable({ tap = tap }, meta))
 end
 
 -- Shortcut for knu.chord.new(...):start()

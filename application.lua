@@ -15,7 +15,7 @@ application.changeWatcher = hs.application.watcher.new(function (name, type, app
           end
 
           return
-        end        
+        end
       end
     else
       local reg = registry[app:bundleID()]
@@ -30,7 +30,7 @@ application.changeWatcher = hs.application.watcher.new(function (name, type, app
     end
 end):start()
 
--- Add a watcher function for the application with a given bundle ID
+-- Adds a watcher function for the application with a given bundle ID
 --
 -- This framework is handlier than directly using
 -- `hs.application.watcher` if you deal with a `terminated` event,
@@ -59,7 +59,8 @@ application.onChange = function (bundleID, fn, terminatedOnStart)
   end
 end
 
--- Remove a watcher function for the application with a given bundle ID
+-- Removes a watcher function for the application with a given bundle
+-- ID
 application.offChange = function (bundleID, fn)
   local reg = registry[bundleID]
   if not reg then

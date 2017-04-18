@@ -8,7 +8,7 @@ usb.changeWatcher = hs.usb.watcher.new(function (device)
     end
 end):start()
 
--- Add a USB watcher function
+-- Adds a USB watcher function
 --
 -- A given function is immediately called for each device that is
 -- currently attached.
@@ -20,7 +20,7 @@ usb.onChange = function (fn)
   end
 end
 
--- Remove a USB watcher function
+-- Removes a USB watcher function
 usb.offChange = function (fn)
   for i = #fnsOnChange, 1, -1 do
     if fnsOnChange[i] == fn then
