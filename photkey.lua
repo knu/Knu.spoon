@@ -117,7 +117,6 @@ photkey.new = function (pmods, key, fn)
     mods[#mods+1] = mod
   end
 
-  local flags = utils.modifierFlags(mods)
   local code
   if type(key) == "number" then
     code = key
@@ -128,7 +127,7 @@ photkey.new = function (pmods, key, fn)
   local tap = hs.eventtap.new(
     { keyDown },
     function (e)
-      if e:getKeyCode() ~= code or utils.modifierFlags(e:getFlags()) ~= flags then
+      if e:getKeyCode() ~= code or not e:getFlags():containExactly(mods) then
         return
       end
       for mod, lr in pairs(modLr) do

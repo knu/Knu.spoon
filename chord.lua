@@ -148,7 +148,7 @@ chord.new = function (mods, keys, fn, threshold)
         end
         return false
       end
-      if i and utils.modifierFlags(e:getFlags()) == utils.modifierFlags(mods) then
+      if i and e:getFlags():containExactly(mods) then
         if isPassthrough(i) then
           setPassthrough(i, false)
           return false
