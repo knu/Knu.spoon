@@ -1,6 +1,11 @@
 hs-knu modules
 ==============
 
+Requirements
+------------
+
+- Hammerspoon 0.9.53 or later
+
 Usage
 -----
 

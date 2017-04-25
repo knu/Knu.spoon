@@ -93,29 +93,12 @@ end
 keyboard.pasteFunctions = {
 }
 
-local savePB
-
-if hs.pasteboard.readAllData then
-  savePB = function (delay)
-    local data = hs.pasteboard.readAllData()
-    return function ()
-      hs.timer.doAfter(delay or 0.2, function ()
-          hs.pasteboard.writeAllData(data)
-      end)
-    end
-  end
-else
-  savePB = function (delay)
-    local data = hs.pasteboard.readImage(true) or
-      hs.pasteboard.readSound(true) or
-      hs.pasteboard.readStyledText(true) or
-      hs.pasteboard.readURL(true) or
-      hs.pasteboard.readColor(true)
-    return function ()
-      hs.timer.doAfter(delay or 0.2, function ()
-          hs.pasteboard.writeObjects(data)
-      end)
-    end
+local savePB = function (delay)
+  local data = hs.pasteboard.readAllData()
+  return function ()
+    hs.timer.doAfter(delay or 0.2, function ()
+        hs.pasteboard.writeAllData(data)
+    end)
   end
 end
 
