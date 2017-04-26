@@ -1,57 +1,10 @@
 local photkey = {}
 
 local keyDown = hs.eventtap.event.types.keyDown
-local flagsChanged = hs.eventtap.event.types.flagsChanged
 
 local runtime = require((...):gsub("[^.]+$", "runtime"))
 local utils = require((...):gsub("[^.]+$", "utils"))
-
-local modState = {
-  shift = {false, false},
-  ctrl = {false, false},
-  alt = {false, false},
-  cmd = {false, false},
-  fn = false
-}
-
-local modTracer = hs.eventtap.new({flagsChanged},
-  function (e)
-    local code = e:getKeyCode()
-    local cmod, cidx
-    if code == 63 then
-      modState.fn = e:getFlags().fn == true
-      return
-    elseif code == 56 then
-      cmod, cidx = "shift", 1
-    elseif code == 60 then
-      cmod, cidx = "shift", 2
-    elseif code == 59 then
-      cmod, cidx = "ctrl", 1
-    elseif code == 62 then
-      cmod, cidx = "ctrl", 2
-    elseif code == 58 then
-      cmod, cidx = "alt", 1
-    elseif code == 61 then
-      cmod, cidx = "alt", 2
-    elseif code == 55 then
-      cmod, cidx = "cmd", 1
-    elseif code == 54 then
-      cmod, cidx = "cmd", 2
-    else
-      return
-    end
-
- local lr = modState[cmod]
-    lr[cidx] = not lr[cidx]
-    local flag = (e:getFlags()[cmod] == true)
-    if (lr[1] or lr[2]) ~= flag then
-      -- Fix unsynced modifier state typically caused by other eventtaps
-      lr[1] = false
-      lr[2] = false
-      lr[cidx] = flag
-    end
-  end
-)
+local keyboard = require((...):gsub("[^.]+$", "keyboard"))
 
 photkey.methods = {
   -- Provide hotkey compatible API for convenience
@@ -94,7 +47,7 @@ local meta = {
 -- * leftshift, rightshift, leftctrl, rightctrl, leftalt, rightalt,
 --   leftcmd, rightcmd and fn
 photkey.new = function (pmods, key, fn)
-  modTracer:start()
+  local modState = keyboard.getModifierState()
 
   local mods = {}
   local modLr = {}
