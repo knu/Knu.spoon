@@ -6,6 +6,8 @@ local keyUp = hs.eventtap.event.types.keyUp
 local utils = require((...):gsub("[^.]+$", "utils"))
 local runtime = require((...):gsub("[^.]+$", "runtime"))
 
+local activeChords = {}
+
 chord.methods = {
   -- Provide hotkey compatible API for convenience
   enable = function (self)
@@ -47,6 +49,8 @@ chord.new = function (mods, keys, fn, threshold)
     error("a table of two or more keys must be passed.")
   end
 
+  local self = {}
+
   local flagMask = (1 << #keys) - 1
   local downFlags = 0
   local function isAllDown()
@@ -55,6 +59,7 @@ chord.new = function (mods, keys, fn, threshold)
   local function setDown(i, bool)
     if bool then
       downFlags = downFlags | (1 << (i - 1))
+      activeChords[self] = true
     else
       downFlags = downFlags & ~(1 << (i - 1))
     end
@@ -130,7 +135,14 @@ chord.new = function (mods, keys, fn, threshold)
     end
   end
 
-  local tap = hs.eventtap.new(
+  function self:reset()
+    activeChords[self] = nil
+    resetAllPending()
+    resetAllDown()
+    timers:stopAll()
+  end
+
+  self.tap = hs.eventtap.new(
     {
       keyDown,
       keyUp,
@@ -155,9 +167,10 @@ chord.new = function (mods, keys, fn, threshold)
         end
         setDown(i, true)
         if isAllDown() then
-          resetAllPending()
-          resetAllDown()
-          timers:stopAll()
+          self:reset()
+          for anotherChord, _ in pairs(activeChords) do
+            anotherChord:reset()
+          end
           fn()
         else
           setPending(i, true)
@@ -177,7 +190,7 @@ chord.new = function (mods, keys, fn, threshold)
     end
   )
 
-  return runtime.guard(setmetatable({ tap = tap }, meta))
+  return runtime.guard(setmetatable(self, meta))
 end
 
 -- Shortcut for knu.chord.new(...):start()
