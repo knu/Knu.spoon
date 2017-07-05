@@ -96,7 +96,7 @@ keyboard.pasteFunctions = {
 local savePB = function (delay)
   local data = hs.pasteboard.readAllData()
   return function ()
-    hs.timer.doAfter(delay or 0.2, function ()
+    hs.timer.doAfter(delay or 0.5, function ()
         hs.pasteboard.writeAllData(data)
     end)
   end
