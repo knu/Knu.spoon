@@ -118,6 +118,20 @@ emoji.chooser = function (fn)
       end
   end)
   chooser:searchSubText(true)
+  chooser:queryChangedCallback(
+    function (query)
+      local choices = emoji.choices
+      if #query > 0 then
+        local words = hs.fnutils.split(query:lower(), "%s+")
+        choices = hs.fnutils.ifilter(choices, function (choice)
+            return hs.fnutils.every(words, function (word)
+                return choice.text:lower():find(word, 1, true) or choice.subText:lower():find(word, 1, true)
+            end)
+        end)
+      end
+      chooser:choices(choices)
+    end
+  )
   chooser:choices(emoji.choices)
 
   return chooser
