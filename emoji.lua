@@ -3,6 +3,19 @@ local emoji = {}
 local json_file = "emojione/emoji.json"
 local image_dir = "gemojione/assets/png"
 
+local parse_codepoints = function (str)
+  return hs.fnutils.map(
+    hs.fnutils.split(str, "-"),
+    function (hex)
+      return tonumber(hex, 16)
+    end
+  )
+end
+
+local stringify_codepoints = function (codepoints)
+  return hs.utf8.codepointToUTF8(table.unpack(codepoints))
+end
+
 local categories = {
   "people",
   "nature",
@@ -64,18 +77,13 @@ local initializers = {
           return (str .. "-"):find("-fe0f-") ~= nil
         end
       ) or matches[1]
-      local codepoints = hs.fnutils.map(
-        hs.fnutils.split(codepoints_string, "-"),
-        function (hex)
-          return tonumber(hex, 16)
-        end
-      )
+      local codepoints = parse_codepoints(codepoints_string)
       local us = hs.fnutils.map(codepoints,
         function (cp)
           return ("U+%04X"):format(cp)
         end
       )
-      local moji = hs.utf8.codepointToUTF8(table.unpack(codepoints))
+      local moji = stringify_codepoints(codepoints)
       local keywords = { entry.shortname }
       for _, name in ipairs(entry.keywords) do
         local keyword = ":" .. underscore(name) .. ":"
