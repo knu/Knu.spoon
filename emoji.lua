@@ -1,8 +1,5 @@
 local emoji = {}
 
-local json_file = "emojione/emoji.json"
-local image_dir = "gemojione/assets/png"
-
 local parse_codepoints = function (str)
   return hs.fnutils.map(
     hs.fnutils.split(str, "-"),
@@ -14,6 +11,29 @@ end
 
 local stringify_codepoints = function (codepoints)
   return hs.utf8.codepointToUTF8(table.unpack(codepoints))
+end
+
+local get_emojione_table = function ()
+  local json_file = "emojione/emoji.json"
+  if hs.fs.attributes(json_file, "mode") ~= "file" then
+    hs.execute("git clone --depth=1 https://github.com/joypixels/emojione.git")
+  else
+    hs.execute("cd emojione && git pull")
+  end
+  local f = io.open(json_file, "r")
+  local json = f:read("a")
+  f:close()
+  return hs.json.decode(json)
+end
+
+local get_gemojione_image_dir = function ()
+  local dir = "gemojione/assets/png"
+  if hs.fs.attributes(dir, "mode") ~= "directory" then
+    hs.execute("git clone --depth=1 https://github.com/bonusly/gemojione.git")
+  else
+    hs.execute("cd gemojione && git pull")
+  end
+  return dir
 end
 
 local categories = {
@@ -50,26 +70,15 @@ local underscore = function (text)
 end
 
 local initializers = {
-  table = function ()
-    if hs.fs.attributes(json_file, "mode") ~= "file" then
-      hs.execute("git clone --depth=1 https://github.com/joypixels/emojione.git")
-    end
-    local f = io.open(json_file, "r")
-    local json = f:read("a")
-    f:close()
-    if hs.fs.attributes(json_file, "mode") ~= "directory" then
-      hs.execute("git clone --depth=1 https://github.com/bonusly/gemojione.git")
-    end
-    return hs.json.decode(json)
-  end,
-
   choices = function ()
     local choices = {}
     local compare = function (a, b)
       return a.order < b.order
     end
-    for key in hs.fnutils.sortByKeyValues(emoji.table, compare) do
-      local entry = emoji.table[key]
+    local emojione_table = get_emojione_table()
+    local image_dir = get_gemojione_image_dir()
+    for key in hs.fnutils.sortByKeyValues(emojione_table, compare) do
+      local entry = emojione_table[key]
       local matches = entry.code_points.default_matches
       local codepoints_string = hs.fnutils.find(
         matches,
