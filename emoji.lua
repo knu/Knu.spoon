@@ -26,6 +26,33 @@ local get_emojione_table = function ()
   return hs.json.decode(json)
 end
 
+local get_slack_shortnames_table = function ()
+  local json_file = "emoji-data/emoji.json"
+  if hs.fs.attributes(json_file, "mode") ~= "directory" then
+    hs.execute("git clone --depth=1 https://github.com/iamcal/emoji-data.git")
+  else
+    hs.execute("cd emoji-data && git pull")
+  end
+  local f = io.open(json_file, "r")
+  local json = f:read("a")
+  f:close()
+  local shortnames_table = {}
+  for _, emoji in ipairs(hs.json.decode(json)) do
+    local shortnames = emoji.short_names
+    local emojis = { emoji }
+    if emoji.skin_variations ~= nil then
+      for _, variation in pairs(emoji.skin_variations) do
+        table.insert(emojis, variation)
+      end
+    end
+    for _, variation in ipairs(emojis) do
+      local moji = stringify_codepoints(parse_codepoints(variation.unified))
+      shortnames_table[moji] = shortnames
+    end
+  end
+  return shortnames_table
+end
+
 local get_gemojione_image_dir = function ()
   local dir = "gemojione/assets/png"
   if hs.fs.attributes(dir, "mode") ~= "directory" then
@@ -76,6 +103,7 @@ local initializers = {
       return a.order < b.order
     end
     local emojione_table = get_emojione_table()
+    local shortnames_table = get_slack_shortnames_table()
     local image_dir = get_gemojione_image_dir()
     for key in hs.fnutils.sortByKeyValues(emojione_table, compare) do
       local entry = emojione_table[key]
@@ -94,11 +122,23 @@ local initializers = {
       )
       local moji = stringify_codepoints(codepoints)
       local keywords = { entry.shortname }
-      for _, name in ipairs(entry.keywords) do
-        local keyword = ":" .. underscore(name) .. ":"
-        if not hs.fnutils.some(keywords, function (e) return e == keyword end) then
-          table.insert(keywords, keyword)
+      hs.fnutils.concat(keywords, entry.shortname_alternates)
+      local add_keyword = function (new_keyword)
+        if new_keyword == "" then
+          print(hs.inspect(emoji))
         end
+        if not hs.fnutils.some(keywords, function (keyword) return keyword == new_keyword end) then
+          table.insert(keywords, new_keyword)
+        end
+      end
+      local shortnames = shortnames_table[moji]
+      if shortnames ~= nil then
+        for _, name in ipairs(shortnames) do
+          add_keyword(":" .. name .. ":")
+        end
+      end
+      for _, name in ipairs(entry.keywords) do
+        add_keyword(":" .. underscore(name) .. ":")
       end
       local text = titlecase(entry.name)
       local subText = "<" .. table.concat(us, " ") .. "> " .. table.concat(keywords, " ")
