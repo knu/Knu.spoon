@@ -84,7 +84,7 @@ local initializers = {
         end
       end
       local text = titlecase(entry.name)
-      local subText = table.concat(us, " ") .. ": " .. table.concat(keywords, ", ")
+      local subText = "<" .. table.concat(us, " ") .. "> " .. table.concat(keywords, " ")
       table.insert(choices, {
         text = text,
         subText = subText,
