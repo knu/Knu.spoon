@@ -13,12 +13,12 @@ local stringify_codepoints = function (codepoints)
   return hs.utf8.codepointToUTF8(table.unpack(codepoints))
 end
 
-local get_emojione_table = function ()
-  local json_file = "emojione/emoji.json"
+local get_joypixels_table = function ()
+  local json_file = "emoji-assets/emoji.json"
   if hs.fs.attributes(json_file, "mode") ~= "file" then
-    hs.execute("git clone --depth=1 https://github.com/joypixels/emojione.git")
+    hs.execute("git clone --depth=1 https://github.com/joypixels/emoji-assets.git")
   else
-    hs.execute("cd emojione && git pull")
+    hs.execute("cd emoji-assets && git pull")
   end
   local f = io.open(json_file, "r")
   local json = f:read("a")
@@ -51,16 +51,6 @@ local get_slack_shortnames_table = function ()
     end
   end
   return shortnames_table
-end
-
-local get_gemojione_image_dir = function ()
-  local dir = "gemojione/assets/png"
-  if hs.fs.attributes(dir, "mode") ~= "directory" then
-    hs.execute("git clone --depth=1 https://github.com/bonusly/gemojione.git")
-  else
-    hs.execute("cd gemojione && git pull")
-  end
-  return dir
 end
 
 local categories = {
@@ -102,19 +92,22 @@ local initializers = {
     local compare = function (a, b)
       return a.order < b.order
     end
-    local emojione_table = get_emojione_table()
+    local log = hs.logger.new("emoji", "debug")
+    local joypixels_table = get_joypixels_table()
     local shortnames_table = get_slack_shortnames_table()
-    local image_dir = get_gemojione_image_dir()
+    local image_dir = "emoji-assets/png/64"
     local apple_image_dir = "emoji-data/img-apple-64";
-    for key in hs.fnutils.sortByKeyValues(emojione_table, compare) do
-      local entry = emojione_table[key]
-      local matches = entry.code_points.default_matches
-      local codepoints_string = hs.fnutils.find(
-        matches,
-        function (str)
-          return (str .. "-"):find("-fe0f-") ~= nil
-        end
-      ) or matches[1]
+    local get_image = function (entry)
+      local file = apple_image_dir .. "/" .. entry.code_points.fully_qualified .. ".png"
+      if hs.fs.attributes(file, "mode") == "file" then
+        return hs.image.imageFromPath(file)
+      else
+        return hs.image.imageFromPath(image_dir .. "/" .. entry.code_points.base .. ".png")
+      end
+    end
+    for key in hs.fnutils.sortByKeyValues(joypixels_table, compare) do
+      local entry = joypixels_table[key]
+      local codepoints_string = entry.code_points.fully_qualified
       local codepoints = parse_codepoints(codepoints_string)
       local us = hs.fnutils.map(codepoints,
         function (cp)
@@ -143,20 +136,10 @@ local initializers = {
       end
       local text = titlecase(entry.name)
       local subText = "<" .. table.concat(us, " ") .. "> " .. table.concat(keywords, " ")
-      local image
-      for _, basename in ipairs(entry.code_points.default_matches) do
-        local file = apple_image_dir .. "/" .. basename .. ".png"
-        if hs.fs.attributes(file, "mode") == "file" then
-          image = hs.image.imageFromPath(file)
-        end
-      end
-      if image == nil then
-        image = hs.image.imageFromPath(image_dir .. "/" .. entry.code_points.base .. ".png")
-      end
       table.insert(choices, {
         text = text,
         subText = subText,
-        image = image,
+        image = get_image(entry),
         chars = moji,
       })
     end
