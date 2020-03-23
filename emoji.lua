@@ -105,6 +105,7 @@ local initializers = {
     local emojione_table = get_emojione_table()
     local shortnames_table = get_slack_shortnames_table()
     local image_dir = get_gemojione_image_dir()
+    local apple_image_dir = "emoji-data/img-apple-64";
     for key in hs.fnutils.sortByKeyValues(emojione_table, compare) do
       local entry = emojione_table[key]
       local matches = entry.code_points.default_matches
@@ -142,10 +143,20 @@ local initializers = {
       end
       local text = titlecase(entry.name)
       local subText = "<" .. table.concat(us, " ") .. "> " .. table.concat(keywords, " ")
+      local image
+      for _, basename in ipairs(entry.code_points.default_matches) do
+        local file = apple_image_dir .. "/" .. basename .. ".png"
+        if hs.fs.attributes(file, "mode") == "file" then
+          image = hs.image.imageFromPath(file)
+        end
+      end
+      if image == nil then
+        image = hs.image.imageFromPath(image_dir .. "/" .. entry.code_points.base .. ".png")
+      end
       table.insert(choices, {
         text = text,
         subText = subText,
-        image = hs.image.imageFromPath(image_dir .. "/" .. entry.code_points.base .. ".png"),
+        image = image,
         chars = moji,
       })
     end
