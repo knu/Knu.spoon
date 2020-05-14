@@ -1,5 +1,7 @@
 local keyboard = {}
 
+local utils = require((...):gsub("[^.]+$", "utils"))
+
 -- Some of the known Japanese input source IDs:
 --   com.apple.inputmethod.Kotoeri.Japanese
 --   com.apple.inputmethod.Kotoeri.Japanese.FullWidthRoman
@@ -269,6 +271,14 @@ local modTracer = hs.eventtap.new({hs.eventtap.event.types.flagsChanged},
 keyboard.getModifierState = function ()
   modTracer:start()
   return modState
+end
+
+keyboard.switchKarabinerProfile = function (name)
+  hs.execute(utils.shelljoin(
+      "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli",
+      "--select-profile",
+      name
+  ))
 end
 
 return keyboard

@@ -128,29 +128,37 @@ do
 end
 ```
 
-### Example: USB watcher and shell escaping
+### Example: Shell escape
 
 ```lua
--- Switch between Karabiner-Elements profiles by keyboard
+-- knu.utils.shelljoin() is a method to build a command line from a list of arguments
+-- with shell meta characters properly escaped
 
-function switchKarabinerElementsProfile(name)
-  hs.execute(knu.utils.shelljoin(
-      "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli",
-      "--select-profile",
-      name
-  ))
-end
+local extra_options = { "--exclude", ".*" }
 
+hs.execute(knu.utils.shelljoin(
+    "rsync",
+    "-a",
+    extra_options, -- no need for table.unpack()
+    src,
+    dest
+))
+```
+
+### Example: USB watcher
+
+```lua
+-- Switch the Karabiner-Elements profile when an external keyboard is attached or detached
 knu.usb.onChange(function (device)
     local name = device.productName
     if name and (
-        name:find("PS2") or  -- I still use PS/2 Kinesis Keyboard via USB adapter...
+        name:find("PS2") or -- PS/2-USB converter
           (not device.vendorName:find("^Apple") and name:find("Keyboard"))
       ) then
       if device.eventType == "added" then
-        switchKarabinerElementsProfile("External")
+        knu.keyboard.switchKarabinerProfile("External")
       else
-        switchKarabinerElementsProfile("Default")
+        knu.keyboard.switchKarabinerProfile("Default")
       end
     end
 end)
