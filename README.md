@@ -191,6 +191,13 @@ launchByHotkeyWhileNotRunning({"alt", "ctrl"}, "/", "com.kapeli.dashdoc")
 launchByHotkeyWhileNotRunning({"alt", "ctrl"}, "t", "com.googlecode.iterm2")
 ```
 
+### Example: Enable the hold-to-scroll mode with the middle button
+
+```lua
+-- Scroll by moving the mouse while holding the middle button
+knu.mouse.holdToScrollButton():enable()
+```
+
 Modules
 -------
 
@@ -203,6 +210,8 @@ Modules
 
 - keymap.lua: application/window based keymap switching
 
+- mouse.lua: functions to handle mouse events
+
 - photkey.lua: pseudo hotkeys with extended modifiers support
 
 - runtime.lua: functions like restart() and guard() (from GC)
@@ -214,6 +223,6 @@ Modules
 License
 -------
 
-Copyright (c) 2017 [Akinori MUSHA](https://akinori.org/)
+Copyright (c) 2017-2021 [Akinori MUSHA](https://akinori.org/)
 
 Licensed under the 2-clause BSD license.  See `LICENSE` for details.
