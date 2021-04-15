@@ -46,7 +46,13 @@ local meta = {
 --
 -- * leftshift, rightshift, leftctrl, rightctrl, leftalt, rightalt,
 --   leftcmd, rightcmd and fn
-photkey.new = function (pmods, key, fn)
+--
+-- The handler function is called with a key event.
+--
+-- The types paramter specifies the event types to capture, defaulted
+-- to { hs.eventtap.event.types.keyDown }.
+photkey.new = function (pmods, key, fn, types)
+  types = types or { keyDown }
   local modState = keyboard.getModifierState()
 
   local mods = {}
@@ -78,7 +84,7 @@ photkey.new = function (pmods, key, fn)
   end
 
   local tap = hs.eventtap.new(
-    { keyDown },
+    types,
     function (e)
       if e:getKeyCode() ~= code or not e:getFlags():containExactly(mods) then
         return
@@ -88,7 +94,7 @@ photkey.new = function (pmods, key, fn)
           return
         end
       end
-      fn()
+      fn(e)
       return true
     end
   )
