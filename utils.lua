@@ -124,4 +124,13 @@ utils.shelljoin = function (...)
   return s
 end
 
+-- Returns keys of a table
+utils.keys = function (table)
+  local keys = {}
+  for key in pairs(table) do
+    keys[#keys + 1] = key
+  end
+  return keys
+end
+
 return utils
