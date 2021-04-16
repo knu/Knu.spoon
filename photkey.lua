@@ -61,11 +61,11 @@ photkey.new = function (pmods, key, fn, types)
   for _, pmod in ipairs(pmods) do
     local mod = pmod:match("left(.+)")
     if mod then
-      modLr[mod] = 1
+      modLr[mod] = (modLr[mod] or 0) | 1
     else
       mod = pmod:match("right(.+)")
       if mod then
-        modLr[mod] = 2
+        modLr[mod] = (modLr[mod] or 0) | 2
       else
         mod = pmod
       end
@@ -90,7 +90,14 @@ photkey.new = function (pmods, key, fn, types)
         return
       end
       for mod, lr in pairs(modLr) do
-        if not modState[mod][lr] then
+        local modStateLr = 0
+        if modState[mod][1] then
+          modStateLr = modStateLr | 1
+        end
+        if modState[mod][2] then
+          modStateLr = modStateLr | 2
+        end
+        if modStateLr ~= lr then
           return
         end
       end
