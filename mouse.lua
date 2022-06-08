@@ -79,6 +79,7 @@ mouse.holdToScrollButton = function (button, scrollOffsetsFunction, delay)
       if state ~= 0 and not e:getButtonState(button) then
         if state == 1 then
           state = 0
+          e:location(origin)
           return true, {
             e:copy():setType(mouseDownEventType),
             e
