@@ -78,7 +78,25 @@ mouse.holdToScrollButton = function (button, scrollOffsetsFunction, delay)
   local mouseUp = hs.eventtap.new({ mouseUpEventType }, function (e)
       if state ~= 0 and not e:getButtonState(button) then
         if state == 1 then
+          local pos = e:location()
+          local dx = 0
+          local dy = 0
+          for _, delta in ipairs(deltas) do
+            dx = dx + delta.x
+            dy = dy + delta.y
+          end
           state = 0
+          deltas = {}
+          hs.timer.doAfter(0, function ()
+              local pos = hs.mouse.absolutePosition()
+              pos.x = pos.x + dx
+              pos.y = pos.y + dy
+              hs.mouse.absolutePosition(pos)
+              local move = hs.eventtap.event.newEvent(hs.eventtap.event.types.mouseMoved, pos)
+              move:setProperty(hs.eventtap.event.properties.mouseEventDeltaX, dx)
+              move:setProperty(hs.eventtap.event.properties.mouseEventDeltaY, dy)
+              move:post()
+          end)
           e:location(origin)
           return true, {
             e:copy():setType(mouseDownEventType),
