@@ -40,7 +40,7 @@ end)
 
 ```lua
 knu.photkey.bind({"rightcmd", "shift"}, "q", function ()
-    -- This is invoked with left command + shift (left or right) + Q
+    -- This is invoked with right command + shift (left or right) + Q
     hs.execute(("kill %d"):format(hs.application.frontmostApplication():pid()))
 end)
 ```
