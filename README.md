@@ -17,8 +17,6 @@ git clone https://github.com/knu/hs-knu.git ~/.hammerspoon/knu
 
 ```lua
 knu = require("knu")
--- Function to guard a given object from GC
-guard = knu.runtime.guard
 
 -- Enable auto-restart when any of the *.lua files under ~/.hammerspoon/ is modified
 knu.runtime.autorestart(true)
@@ -71,6 +69,9 @@ end
 
 -- Speed up the first invocation
 knu.emoji.preload()
+
+-- Function to guard a given object from GC
+guard = knu.runtime.guard
 
 --- z+x+c opens the emoji chooser to input an emoji to the frontmost window
 guard(knu.chord.bind({}, {"z", "x", "c"}, inputEmoji))
