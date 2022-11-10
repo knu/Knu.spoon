@@ -241,6 +241,6 @@ Modules
 License
 -------
 
-Copyright (c) 2017-2021 [Akinori MUSHA](https://akinori.org/)
+Copyright (c) 2017-2022 [Akinori MUSHA](https://akinori.org/)
 
 Licensed under the 2-clause BSD license.  See `LICENSE` for details.
