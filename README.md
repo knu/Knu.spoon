@@ -191,6 +191,21 @@ launchByHotkeyWhileNotRunning({"alt", "ctrl"}, "/", "com.kapeli.dashdoc")
 launchByHotkeyWhileNotRunning({"alt", "ctrl"}, "t", "com.googlecode.iterm2")
 ```
 
+### Example: Enhanced application launcher function
+
+```lua
+-- Refresh calendars every 15 minutes
+hs.timer.doEvery(15 * 60, function ()
+    knu.application.launchInBackground("com.apple.iCal", function (app)
+        if app ~= nil then
+          app:selectMenuItem({"View", "Refresh Calendars"})
+          -- Depending on your language settings...
+          -- app:selectMenuItem({"表示", "カレンダーを更新"})
+        end
+    end, 10, true)
+end)
+```
+
 ### Example: Enable the hold-to-scroll mode with the middle button
 
 ```lua
@@ -200,6 +215,8 @@ knu.mouse.holdToScrollButton():enable()
 
 Modules
 -------
+
+- application.lua: application change watcher and advanced application launcher functions
 
 - chord.lua: key chord implementation (`SimultaneousKeyPress`
   in [Karabiner](https://pqrs.org/osx/karabiner/))
