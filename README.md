@@ -214,6 +214,17 @@ end)
 knu.mouse.holdToScrollButton():enable()
 ```
 
+### Example: URL unshortener
+
+```lua
+url, error = knu.http.unshortenURL(originalURL)
+if error ~= nil then
+  logger.e("Error in unshortening URL " .. originalURL .. ": " .. error)
+end
+
+-- Use url
+```
+
 Modules
 -------
 
@@ -223,6 +234,8 @@ Modules
   in [Karabiner](https://pqrs.org/osx/karabiner/))
 
 - emoji.lua: emoji database and chooser
+
+- http.lua: functions to manipulate URLs
 
 - keyboard.lua: functions to handle input source switching
 
@@ -241,6 +254,6 @@ Modules
 License
 -------
 
-Copyright (c) 2017-2022 [Akinori MUSHA](https://akinori.org/)
+Copyright (c) 2017-2023 [Akinori MUSHA](https://akinori.org/)
 
 Licensed under the 2-clause BSD license.  See `LICENSE` for details.
