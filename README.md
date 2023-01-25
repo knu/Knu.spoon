@@ -1,5 +1,7 @@
-hs-knu modules
-==============
+Knu.spoon for Hammerspoon
+=========================
+
+This is a Hammerspoon module that contains useful modules written by Akinori Musha a.k.a. [@knu](https://github.com/knu).
 
 Requirements
 ------------
@@ -11,12 +13,10 @@ Usage
 
 ### Install
 
-```
-git clone https://github.com/knu/hs-knu.git ~/.hammerspoon/knu
-```
+Grab the latest release from the [releases](https://github.com/knu/Knu.spoon/releases) page, unzip it, and open the file "Knu.spoon" to install the module as a Spoon.
 
 ```lua
-knu = require("knu")
+knu = hs.loadSpoon("Knu")
 
 -- Enable auto-restart when any of the *.lua files under ~/.hammerspoon/ is modified
 knu.runtime.autorestart(true)
@@ -257,3 +257,5 @@ License
 Copyright (c) 2017-2023 [Akinori MUSHA](https://akinori.org/)
 
 Licensed under the 2-clause BSD license.  See `LICENSE` for details.
+
+Visit [GitHub Repository](https://github.com/knu/Knu.spoon) for the latest information.
