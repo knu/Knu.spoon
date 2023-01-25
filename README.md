@@ -217,9 +217,9 @@ knu.mouse.holdToScrollButton():enable()
 ### Example: URL unshortener
 
 ```lua
-url, error = knu.http.unshortenURL(originalURL)
+url, error = knu.http.unshortenUrl(originalURL)
 if error ~= nil then
-  logger.e("Error in unshortening URL " .. originalURL .. ": " .. error)
+  logger.e("Error in unshortening a URL " .. originalURL .. ": " .. error)
 end
 
 -- Use url

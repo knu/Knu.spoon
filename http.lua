@@ -60,7 +60,7 @@ http.shortenerHosts = {
 -- table of known shortener hosts.  This function does not try to
 -- follow redirects of a URL with a host name that is not on this
 -- list.
-http.unshortenURL = function(url)
+http.unshortenUrl = function(url)
   local purl = url
   local nurl = url
   local count = 0
