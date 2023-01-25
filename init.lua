@@ -2,7 +2,13 @@ local __namespace__, __file__ = ...
 __namespace__ = __namespace__:gsub("%.init$", "")  -- just in case
 local __dir__ = __file__:match("^(.*)/[^/]+$")
 
-local knu = {}
+local knu = {
+  name = "Knu",
+  version = "1.0.0",
+  author = "Akinori Musha <knu@iDaemons.org>",
+  homepage = "https://github.com/knu/hs-knu",
+  license = "BSD-2-Clause - https://opensource.org/licenses/BSD-2-Clause",
+}
 
 local function loadModule(name)
   knu[name] = require(__namespace__ .. "." .. name)
