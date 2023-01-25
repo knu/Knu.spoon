@@ -1,6 +1,7 @@
 local keyboard = {}
 
-local utils = require((...):gsub("[^.]+$", "utils"))
+local knu = hs.loadSpoon("Knu")
+local utils = knu.utils
 
 -- Some of the known Japanese input source IDs:
 --   com.apple.inputmethod.Kotoeri.Japanese

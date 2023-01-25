@@ -1,7 +1,8 @@
 local http = {}
 
 local fnutils = hs.fnutils
-local utils = require((...):gsub("[^.]+$", "utils"))
+local knu = hs.loadSpoon("Knu")
+local utils = knu.utils
 
 -- This is a wrapperr of hs.http.urlParts() that adds a "params" table
 -- and lowercases the "scheme" and "host" fields.

@@ -2,9 +2,10 @@ local photkey = {}
 
 local keyDown = hs.eventtap.event.types.keyDown
 
-local runtime = require((...):gsub("[^.]+$", "runtime"))
-local utils = require((...):gsub("[^.]+$", "utils"))
-local keyboard = require((...):gsub("[^.]+$", "keyboard"))
+local knu = hs.loadSpoon("Knu")
+local runtime = knu.runtime
+local utils = knu.utils
+local keyboard = knu.keyboard
 
 photkey.methods = {
   -- Provide hotkey compatible API for convenience

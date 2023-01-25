@@ -3,8 +3,9 @@ local chord = {}
 local keyDown = hs.eventtap.event.types.keyDown
 local keyUp = hs.eventtap.event.types.keyUp
 
-local utils = require((...):gsub("[^.]+$", "utils"))
-local runtime = require((...):gsub("[^.]+$", "runtime"))
+local knu = hs.loadSpoon("Knu")
+local utils = knu.utils
+local runtime = knu.runtime
 
 local activeChords = {}
 

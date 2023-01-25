@@ -1,6 +1,7 @@
 local application = {}
 
-local utils = require((...):gsub("[^.]+$", "utils"))
+local knu = hs.loadSpoon("Knu")
+local utils = knu.utils
 
 local registry = {}
 

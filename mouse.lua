@@ -1,6 +1,7 @@
 local mouse = {}
 
-local runtime = require((...):gsub("[^.]+$", "runtime"))
+local knu = hs.loadSpoon("Knu")
+local runtime = knu.runtime
 
 -- Creates a hold-to-scroll button mode
 --

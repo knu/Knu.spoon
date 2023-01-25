@@ -1,6 +1,4 @@
-local __namespace__, __file__ = ...
-__namespace__ = __namespace__:gsub("%.init$", "")  -- just in case
-local __dir__ = __file__:match("^(.*)/[^/]+$")
+local __dir__ = hs.spoons.scriptPath()
 
 local knu = {
   name = "Knu",
@@ -11,7 +9,7 @@ local knu = {
 }
 
 local function loadModule(name)
-  knu[name] = require(__namespace__ .. "." .. name)
+  knu[name] = dofile(hs.spoons.resourcePath(name .. ".lua"))
   return knu[name]
 end
 
