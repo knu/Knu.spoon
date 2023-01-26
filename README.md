@@ -1,7 +1,7 @@
 Knu.spoon for Hammerspoon
 =========================
 
-This is a Hammerspoon module that contains useful modules written by Akinori Musha a.k.a. [@knu](https://github.com/knu).
+This is a Hammerspoon Spoon that contains useful modules written by Akinori Musha a.k.a. [@knu](https://github.com/knu).
 
 Requirements
 ------------
@@ -13,7 +13,7 @@ Usage
 
 ### Install
 
-Grab the latest release from the [releases](https://github.com/knu/Knu.spoon/releases) page, unzip it, and open the file "Knu.spoon" to install the module as a Spoon.
+Grab the file "Hammerspoon-Knu-{version}.zip" from the latest release from the [releases](https://github.com/knu/Knu.spoon/releases) page and unzip it.  Then, install "Knu.spoon" by double-clicking it.
 
 ```lua
 knu = hs.loadSpoon("Knu")
