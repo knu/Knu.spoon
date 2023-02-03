@@ -1,8 +1,13 @@
-VERSION=	$(shell git describe --tags 2>/dev/null || echo v1.0.0-pre)
+VERSION=	$(shell git describe --tags --abbrev=0 2>/dev/null)
 NAME=		Knu
 SPOON=		$(NAME).spoon
-PACKAGE=	Hammerspoon-$(NAME)-$(VERSION).zip
+RELEASE=	$(SPOON).zip
 
-archive:
-	@git archive --format=zip --prefix=$(SPOON)/ @ > $(PACKAGE)
-	@ls -l $(PACKAGE)
+release:
+	@git archive --format=zip --prefix=$(SPOON)/ @ > $(RELEASE)
+	@git switch release
+	@mv $(RELEASE) Spoons/
+	@git add Spoons
+	@git commit -m "$(VERSION)"
+	@git push -f
+	@git switch -
