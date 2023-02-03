@@ -133,4 +133,28 @@ utils.keys = function (table)
   return keys
 end
 
+-- Copies all key-value pairs from one or more source tables to a target table
+utils.assign = function (target, ...)
+  for _, source in ipairs{...} do
+    for key, value in pairs(source) do
+      target[key] = value
+    end
+  end
+  return target
+end
+
+utils.string = {
+  contains = function (str, substring)
+    return str:find(substring, 1, true) ~= nil
+  end,
+
+  startsWith = function (str, prefix)
+    return #prefix <= #str and str:sub(1, #prefix) == prefix
+  end,
+
+  endsWith = function (str, suffix)
+    return #suffix <= #str and str:sub(-#suffix) == suffix
+  end,
+}
+
 return utils
