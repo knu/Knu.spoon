@@ -5,6 +5,8 @@ RELEASE=	$(SPOON).zip
 
 release:
 	@git archive --format=zip --prefix=$(SPOON)/ @ > $(RELEASE)
+	@gh release create $(VERSION) --generate-note
+	@gh release upload $(VERSION) $(RELEASE)
 	@git switch release
 	@mv $(RELEASE) Spoons/
 	@git add Spoons
