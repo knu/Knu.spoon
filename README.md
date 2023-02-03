@@ -13,7 +13,33 @@ Usage
 
 ### Install
 
-Grab the file "Hammerspoon-Knu-{version}.zip" from the latest release from the [releases](https://github.com/knu/Knu.spoon/releases) page and unzip it.  Then, install "Knu.spoon" by double-clicking it.
+Put the following snippet in your `~/.hammerspoon/init.lua`:
+
+```lua
+if hs.fs.attributes("Spoons/Knu.spoon") == nil then
+  hs.execute("mkdir -p Spoons; curl -L https://github.com/knu/Knu.Spoon/raw/release/Spoons/Knu.spoon.zip | tar xf - -C Spoons/")
+end
+```
+
+Alternatively, you can use [SpoonInstall](https://www.hammerspoon.org/Spoons/SpoonInstall.html) like so:
+
+```lua
+if hs.fs.attributes("Spoons/SpoonInstall.spoon") == nil then
+  hs.execute("mkdir -p Spoons; curl -L https://github.com/Hammerspoon/Spoons/raw/master/Spoons/SpoonInstall.spoon.zip | tar xf - -C Spoons/")
+end
+
+hs.loadSpoon("SpoonInstall")
+
+spoon.SpoonInstall.repos.Knu = {
+  url = "https://github.com/knu/Knu.spoon",
+  desc = "Knu.spoon repository",
+  branch = "release",
+}
+spoon.SpoonInstall.use_syncinstall = true
+spoon.SpoonInstall:andUse("Knu", { repo = "Knu" })
+```
+
+After that, you can load Knu.spoon.
 
 ```lua
 knu = hs.loadSpoon("Knu")
