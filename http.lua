@@ -74,7 +74,16 @@ http.unshortenUrl = function(url)
       return purl, "host is missing"
     end
     local host = uri.host:lower()
-    if fnutils.indexOf(http.shortenerHosts, host) == nil then
+    local isShortener = false
+    for _, domain in ipairs(http.shortenerHosts) do
+      logger = hs.logger.new("unshorten", "info")
+      logger.i(host, domain, "." .. domain)
+      if host == domain or utils.string.endsWith(host, "." .. domain) then
+        isShortener = true
+        break
+      end
+    end
+    if not isShortener then
       return nurl, nil
     end
     if count >= 3 then
