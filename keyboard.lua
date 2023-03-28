@@ -1,6 +1,7 @@
 local keyboard = {}
 
 local knu = hs.loadSpoon("Knu")
+local runtime = knu.runtime
 local utils = knu.utils
 
 -- Some of the known Japanese input source IDs:
@@ -274,6 +275,104 @@ keyboard.getModifierState = function ()
   return modState
 end
 
+local makeCodeTable = function (keys)
+  local codeTable = {}
+  for _, key in ipairs(keys) do
+    local code = hs.keycodes.map[key]
+    if code ~= nil then
+      codeTable[code] = true
+    end
+  end
+  return codeTable
+end
+
+-- Caps-words mode is turned on when a capital letter is input holding both shift keys at the same time.  In the mode, capital letters and the underscore can be input without the need for the shift key until non-alphanumeric keys are input.
+--
+-- capsWords([options]) -> A capsWords object that responds to :enable() and :disable()
+--
+-- Parameters:
+--
+--   - options: A table containing the following keys:
+--
+--     - stopKeys: An array of keys that stops the caps-words mode.  Defaults to {"shift"}.
+--     - shiftedKeys: An array of keys that are input with the shift modifier in the caps-words mode.  Defaults to {"a".."z", "-"}.
+--     - continueKeys: An array of keys that are passed through without quitting the caps-words mode.  Defaults to {"_", "0".."9", "delete", "forwarddelete"}.
+--     - continueCtrlKeys: An array of keys that are passed through without quitting the caps-words mode when pressed with the control key.  Defaults to {"h"}.
+
+keyboard.capsWords = function (options)
+  options = options or {}
+  local duration = options.indicatorDuration or 0.5
+  local capsWordsMode = false
+  local options = {}
+  local isStopCode = makeCodeTable(options.stopKeys or {
+      "shift"
+  })
+  local isShiftedCode = makeCodeTable(options.shiftedKeys or {
+      "a", "b", "c", "d", "e", "f", "g", "h",
+      "i", "j", "k", "l", "m", "n", "o", "p",
+      "q", "r", "s", "t", "u", "v", "w", "x",
+      "y", "z", "-"
+  })
+  local isContinueCode = makeCodeTable(options.continueKeys or {
+      "_",
+      "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+      "delete", "forwarddelete"
+  })
+  local isContinueCtrlCode = makeCodeTable(options.continueCtrlKeys or {
+      "h"
+  })
+
+  -- Enable the modifier tracer
+  keyboard.getModifierState()
+
+  local capsWordsHandler = function (e)
+    local code = e:getKeyCode()
+    local flags = e:getFlags()
+
+    if capsWordsMode then
+      if isStopCode[code] then
+        capsWordsMode = false
+      elseif isContinueCtrlCode[code] and flags:containExactly({"ctrl"}) then
+        -- ok
+      elseif isShiftedCode[code] then
+        if flags.cmd or flags.alt or flags.ctrl or flags.fn then
+          capsWordsMode = false
+        elseif not flags.shift then
+          return true, {
+            hs.eventtap.event.newKeyEvent({"shift"}, code, true),
+          }
+        end
+      else
+        capsWordsMode = isContinueCode[code]
+      end
+      if not capsWordsMode then
+        keyboard.showInputMode("⇪⃠", duration)
+      end
+    elseif isShiftedCode[code] and flags:containExactly({"shift"}) then
+      local modState = keyboard.getModifierState()
+      capsWordsMode = modState.shift[1] and modState.shift[2]
+      if capsWordsMode then
+        keyboard.showInputMode("⇪⃝", duration)
+      end
+    end
+
+    return false
+  end
+
+  local capsWordsTap = hs.eventtap.new({hs.eventtap.event.types.keyDown}, capsWordsHandler)
+
+  return runtime.guard({
+      enable = function (self)
+        capsWordsTap:start()
+      end,
+
+      disable = function (self)
+        capsWordsTap:stop()
+      end,
+  })
+end
+
+-- Switch the Karabiner Elements profile
 keyboard.switchKarabinerProfile = function (name)
   hs.execute(utils.shelljoin(
       "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli",
