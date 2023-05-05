@@ -65,6 +65,7 @@ http.unshortenUrl = function(url)
   local purl = url
   local nurl = url
   local count = 0
+  local logger = hs.logger.new("unshorten", "info")
 
   while nurl ~= nil do
     local uri = hs.http.urlParts(nurl)
@@ -76,8 +77,6 @@ http.unshortenUrl = function(url)
     local host = uri.host:lower()
     local isShortener = false
     for _, domain in ipairs(http.shortenerHosts) do
-      logger = hs.logger.new("unshorten", "info")
-      logger.i(host, domain, "." .. domain)
       if host == domain or utils.string.endsWith(host, "." .. domain) then
         isShortener = true
         break
@@ -86,6 +85,7 @@ http.unshortenUrl = function(url)
     if not isShortener then
       return nurl, nil
     end
+    logger.i(host)
     if count >= 3 then
       return nurl, "too many redirects"
     end
