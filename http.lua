@@ -53,6 +53,11 @@ http.shortenerHosts = {
   "wp.me",
   "yhoo.it",
   "zpr.io",
+  -- tracking links
+  "hubspotlinks.com",
+  "list-manage.com",
+  "r.mailjet.com",
+  "ct.sendgrid.net",
 }
 
 -- Unshortens the given URL.  Returns the unshortened URL followed by
