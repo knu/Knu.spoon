@@ -143,15 +143,21 @@ utils.assign = function (target, ...)
   return target
 end
 
+-- Provides additional string functions
+--
+-- To use them as methods, run `knu.utils.assign(string, knu.utils.string)`.
 utils.string = {
+  -- Tests if a string contains a substring
   contains = function (str, substring)
     return str:find(substring, 1, true) ~= nil
   end,
 
+  -- Tests if a string starts with a prefix
   startsWith = function (str, prefix)
     return #prefix <= #str and str:sub(1, #prefix) == prefix
   end,
 
+  -- Tests if a string ends with a suffix
   endsWith = function (str, suffix)
     return #suffix <= #str and str:sub(-#suffix) == suffix
   end,
