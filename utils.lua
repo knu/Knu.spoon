@@ -157,4 +157,52 @@ utils.string = {
   end,
 }
 
+-- Wraps a function to delay its execution until after a specified time has passed since the last call
+--
+-- Parameters:
+--   - func - The function to debounce.
+--   - wait - The delay time in seconds.
+-- Returns:
+--   - A new debounced function.
+utils.debounce = function (func, wait)
+  local timer = nil
+  return function(...)
+    local args = {...}
+    if timer then
+      timer:stop()
+    end
+    timer = hs.timer.doAfter(wait, function() func(table.unpack(args)) end)
+  end
+end
+
+-- Wraps a function to ensure it is called at most once per interval, with an optional trailing execution
+--
+-- Parameters:
+--   - func - The function to throttle.
+--   - interval - The minimum time in seconds between calls.
+--   - trailing - If true, ensures the last call is executed after the interval.
+-- Returns:
+--   - A new throttled function.
+utils.throttle = function (func, interval, trailing)
+  local lastCall = 0
+  local scheduled = false
+
+  return function(...)
+    local now = hs.timer.absoluteTime() / 1e9
+    local args = {...}
+
+    if now - lastCall >= interval then
+      lastCall = now
+      func(table.unpack(args))
+    elseif trailing and not scheduled then
+      scheduled = true
+      hs.timer.doAfter(interval - (now - lastCall), function()
+          lastCall = hs.timer.absoluteTime() / 1e9
+          scheduled = false
+          func(table.unpack(args))
+      end)
+    end
+  end
+end
+
 return utils
