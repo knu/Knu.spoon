@@ -81,10 +81,15 @@ http.unshortenUrl = function(url)
     end
     local host = uri.host:lower()
     local isShortener = false
-    for _, domain in ipairs(http.shortenerHosts) do
-      if host == domain or utils.string.endsWith(host, "." .. domain) then
-        isShortener = true
-        break
+    if uri.path == "/ls/click" and
+      uri.query ~= nil and utils.string.startsWith(uri.query, "upn=") then
+      isShortener = true
+    else
+      for _, domain in ipairs(http.shortenerHosts) do
+        if host == domain or utils.string.endsWith(host, "." .. domain) then
+          isShortener = true
+          break
+        end
       end
     end
     if not isShortener then
