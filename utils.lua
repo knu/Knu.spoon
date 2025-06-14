@@ -124,6 +124,41 @@ utils.shelljoin = function (...)
   return s
 end
 
+-- Runs a shell command, optionally loading the users shell environment first, and returns stdout as a string, followed by the same result codes as `os.execute` would return.
+--
+-- Parameters:
+--   - command  - The command to run, either as a string or a table of arguments.
+--   - user_env - If true, loads the user's login shell environment before running the command.  If a table, passes the key-value pairs as environment variables to the command.
+-- Returns:
+--   - stdout    - The standard output of the command as a string.
+--   - status    - The status of the command execution (true if successful, false otherwise).
+--   - exit_type - The type of exit (e.g., "exit", "signal").
+--   - rc        - The return code of the command.
+utils.execute = function (command, user_env)
+  local commandline
+  if type(command) == "table" then
+    commandline = utils.shelljoin(command)
+  else
+    commandline = command
+  end
+  if type(user_env) == "table" then
+    local env = {}
+    for key, value in pairs(user_env) do
+      if value ~= os.getenv(key) then
+        env[#env + 1] = key .. "=" .. value
+      end
+    end
+    commandline = utils.shelljoin("export", env) .. ";" .. commandline
+  elseif user_env then
+    commandline = utils.shelljoin(os.getenv("SHELL"), "-lic", commandline)
+  end
+  print(commandline)
+  local f = io.popen(commandline, 'r')
+  local s = f:read('*a')
+  local status, exit_type, rc = f:close()
+  return s, status, exit_type, rc
+end
+
 -- Returns keys of a table
 utils.keys = function (table)
   local keys = {}
