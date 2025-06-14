@@ -152,7 +152,6 @@ utils.execute = function (command, user_env)
   elseif user_env then
     commandline = utils.shelljoin(os.getenv("SHELL"), "-lic", commandline)
   end
-  print(commandline)
   local f = io.popen(commandline, 'r')
   local s = f:read('*a')
   local status, exit_type, rc = f:close()
