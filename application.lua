@@ -7,6 +7,10 @@ local registry = {}
 
 local watcher = hs.application.watcher
 
+local appID = function (app)
+  return app:bundleID() or app:path() or app:name()
+end
+
 application.changeWatcher = hs.application.watcher.new(function (name, type, app)
     if type == watcher.terminated then
       for bundleID, reg in pairs(registry) do
@@ -21,7 +25,7 @@ application.changeWatcher = hs.application.watcher.new(function (name, type, app
         end
       end
     else
-      local reg = registry[app:bundleID()]
+      local reg = registry[appID(app)]
       if not reg then
         return
       end
