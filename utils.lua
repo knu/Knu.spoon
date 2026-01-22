@@ -245,4 +245,23 @@ utils.throttle = function (func, interval, trailing)
   end
 end
 
+-- Returns a JSON representation of a value
+--
+-- Unlike `hs.json.encode`, this function can encode a scalar value
+-- (string, number, boolean) or nil without wrapping it in an array.
+--
+-- Parameters:
+--   - value - The value to encode.  Can be nil, a boolean, a number, a string, or a table.
+-- Returns:
+--   - A JSON string representation of the value.
+utils.toJson = function (value)
+  if value == nil then
+    return "null"
+  elseif type(value) == "table" then
+    return hs.json.encode(value)
+  else
+    return (hs.json.encode{value}):sub(2, -2)
+  end
+end
+
 return utils
