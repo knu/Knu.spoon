@@ -280,7 +280,7 @@ Modules
 License
 -------
 
-Copyright (c) 2017-2023 [Akinori MUSHA](https://akinori.org/)
+Copyright (c) 2017-2026 [Akinori MUSHA](https://akinori.org/)
 
 Licensed under the 2-clause BSD license.  See `LICENSE` for details.
 
