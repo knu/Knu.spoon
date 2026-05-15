@@ -172,11 +172,32 @@ end
 -- table of known shortener hosts.  This function does not try to
 -- follow redirects of a URL with a host name that is not on this
 -- list.
-http.unshortenUrl = function(url)
+--
+-- Options:
+--   unwrap: if true, recursively unwrap known redirector URLs
+--           (see http.redirectorHosts) before and after each
+--           shortener resolution.
+http.unshortenUrl = function(url, options)
+  options = options or {}
   local purl = url
   local nurl = url
   local count = 0
   local logger = hs.logger.new("unshorten", "info")
+
+  local function unwrapAll(u)
+    while true do
+      local unwrapped, err = http.unwrapUrl(u)
+      if err ~= nil then
+        return u
+      end
+      u = unwrapped
+    end
+  end
+
+  if options.unwrap then
+    nurl = unwrapAll(nurl)
+    purl = nurl
+  end
 
   while nurl ~= nil do
     local uri = hs.http.urlParts(nurl)
@@ -228,6 +249,9 @@ http.unshortenUrl = function(url)
       return nurl, "HTTP error " .. status
     elseif status >= "300" and location and #location > 0 then
       nurl = location
+      if options.unwrap then
+        nurl = unwrapAll(nurl)
+      end
     else
       -- not a redirect
       return nurl, nil
