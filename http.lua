@@ -80,6 +80,92 @@ http.shortenerHosts = {
   "r.mailjet.com",
 }
 
+-- Hosts that wrap a destination URL in a query parameter (or in the
+-- raw query string).  Each entry has:
+--   host:   a host name or a Lua pattern (anchored with ^).  A plain
+--           string also matches any subdomain.
+--   path:   optional path prefix that must match.
+--   params: list of query parameter names to try in order; the first
+--           one with a non-empty value is used as the target URL.
+--           The special name "?" means the entire raw query string.
+http.redirectorHosts = {
+  { host = "l.facebook.com",        params = {"u"} },
+  { host = "lm.facebook.com",       params = {"u"} },
+  { host = "^www%.google%.[%a.]+$", path = "/url",        params = {"q", "url"} },
+  { host = "^google%.[%a.]+$",      path = "/url",        params = {"q", "url"} },
+  { host = "href.li",               params = {"?"} },
+  { host = "l.instagram.com",       params = {"u"} },
+  { host = "l.messenger.com",       params = {"u"} },
+  { host = "out.reddit.com",        params = {"url"} },
+  { host = "click.redditmail.com",  params = {"url"} },
+  { host = "steamcommunity.com",    path = "/linkfilter", params = {"url"} },
+  { host = "t.umblr.com",           params = {"z"} },
+  { host = "away.vk.com",           params = {"to"} },
+  { host = "l.wl.co",               params = {"u"} },
+  { host = "youtube.com",           path = "/redirect",   params = {"q"} },
+}
+
+local function hostMatches(host, pattern)
+  if pattern:sub(1, 1) == "^" then
+    return host:match(pattern) ~= nil
+  end
+  return host == pattern or utils.string.endsWith(host, "." .. pattern)
+end
+
+local function urldecode(s)
+  return (s:gsub("+", " "):gsub("%%(%x%x)", function(hex)
+    return string.char(tonumber(hex, 16))
+  end))
+end
+
+-- Unwraps a single layer of redirector wrapping.  Returns the
+-- unwrapped URL followed by nil on success, or the original URL
+-- followed by a reason if the URL is not a known redirector or
+-- cannot be unwrapped.  Does not perform any network access and
+-- does not recurse.
+http.unwrapUrl = function(url)
+  local uri = http.urlParts(url)
+  if uri.scheme ~= "http" and uri.scheme ~= "https" then
+    return url, "non-HTTP scheme"
+  end
+  if uri.host == nil then
+    return url, "host is missing"
+  end
+  local path = uri.path or ""
+
+  for _, rule in ipairs(http.redirectorHosts) do
+    if hostMatches(uri.host, rule.host) and (rule.path == nil or utils.string.startsWith(path, rule.path)) then
+      local target
+      for _, name in ipairs(rule.params) do
+        local v
+        if name == "?" then
+          v = uri.query
+        else
+          v = uri.params[name]
+        end
+        if v ~= nil and v ~= "" then
+          target = v
+          break
+        end
+      end
+      if target == nil or target == "" then
+        return url, "no target parameter"
+      end
+      local decoded = urldecode(target)
+      local targetUri = hs.http.urlParts(decoded)
+      if targetUri.scheme == nil then
+        return url, "target is not an absolute URL"
+      end
+      local targetScheme = targetUri.scheme:lower()
+      if targetScheme ~= "http" and targetScheme ~= "https" then
+        return url, "target has non-HTTP scheme"
+      end
+      return decoded, nil
+    end
+  end
+  return url, "not a known redirector"
+end
+
 -- Unshortens the given URL.  Returns the unshortened URL followed by
 -- nil or an error message if it fails.  Failures include too many
 -- recursive redirects, HTTP errors, etc.  http.shortenerHosts is a
