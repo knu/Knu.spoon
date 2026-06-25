@@ -33,6 +33,7 @@ http.shortenerHosts = {
   "bitly.com",
   "bl.ink",
   "buff.ly",
+  "calendar.notion.so", -- /event/...
   "cutt.ly",
   "db.tt",
   "dlvr.it",
