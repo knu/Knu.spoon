@@ -2,7 +2,7 @@ local __dir__ = hs.spoons.scriptPath()
 
 local knu = {
   name = "Knu",
-  version = "1.0.0",
+  version = "1.2.0",
   author = "Akinori Musha <knu@iDaemons.org>",
   homepage = "https://github.com/knu/hs-knu",
   license = "BSD-2-Clause - https://opensource.org/licenses/BSD-2-Clause",
