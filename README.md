@@ -267,6 +267,8 @@ Modules
 
 - keymap.lua: application/window based keymap switching
 
+- menubar.lua: menu bar widgets (`ccusage` for Claude Code usage)
+
 - mouse.lua: functions to handle mouse events
 
 - photkey.lua: pseudo hotkeys with extended modifiers support
