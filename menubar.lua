@@ -138,8 +138,11 @@ ccusage.update = function (reopen)
     ccusage.task = nil
   end
 
+  -- Drain the output through a streaming callback; without it the
+  -- child blocks writing once the output exceeds the 64KB pipe buffer
   local task
-  task = hs.task.new(ccusage.shell, function (exitCode, stdOut, stdErr)
+  local stdout, stderr = {}, {}
+  task = hs.task.new(ccusage.shell, function (exitCode, tailOut, tailErr)
       if ccusage.task ~= task then
         -- Superseded by a newer fetch
         return
@@ -151,10 +154,10 @@ ccusage.update = function (reopen)
         return
       end
 
-      local ok, data = pcall(hs.json.decode, stdOut)
+      local ok, data = pcall(hs.json.decode, table.concat(stdout) .. (tailOut or ""))
       if exitCode ~= 0 or not ok or not data then
         ccusage.menu:setTitle("✳ ⚠")
-        ccusage.menu:setTooltip(stdErr or "ccusage failed")
+        ccusage.menu:setTooltip(table.concat(stderr) .. (tailErr or ""))
         return
       end
 
@@ -169,6 +172,10 @@ ccusage.update = function (reopen)
       if reopen then
         popupMenu()
       end
+  end, function (_, chunkOut, chunkErr)
+      table.insert(stdout, chunkOut or "")
+      table.insert(stderr, chunkErr or "")
+      return true
   end, {"-lic", "exec " .. utils.shelljoin(ccusage.command())})
   ccusage.startedAt = hs.timer.absoluteTime() / 1e9
   ccusage.task = task
