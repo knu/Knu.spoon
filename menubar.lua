@@ -32,6 +32,8 @@ end
 --
 -- Configurable fields (pass to start() or set directly):
 --   - interval - Update interval in seconds. (default: 60)
+--   - timeout  - Seconds after which a stuck fetch is killed and
+--     restarted. (default: 120)
 --   - shell    - Login shell used to run the command. (default: $SHELL or /bin/zsh)
 --   - command  - Function that returns an argv table for fetching usage
 --     in the `ccusage daily --json --sections daily,weekly,monthly`
@@ -42,6 +44,8 @@ end
 --     totalTokens, inputTokens, outputTokens, etc., or nil.
 local ccusage = {
   interval = 60,
+
+  timeout = 120,
 
   shell = os.getenv("SHELL") or "/bin/zsh",
 
@@ -122,11 +126,24 @@ end
 -- If reopen is true, the drop-down menu is reopened after the update.
 ccusage.update = function (reopen)
   ccusage.reopen = ccusage.reopen or reopen or nil
-  if not ccusage.menu or ccusage.task then
+  if not ccusage.menu then
     return
   end
+  if ccusage.task then
+    if hs.timer.absoluteTime() / 1e9 - ccusage.startedAt < ccusage.timeout then
+      return
+    end
+    -- The fetch is taking too long; kill it and start over
+    ccusage.task:terminate()
+    ccusage.task = nil
+  end
 
-  ccusage.task = hs.task.new(ccusage.shell, function (exitCode, stdOut, stdErr)
+  local task
+  task = hs.task.new(ccusage.shell, function (exitCode, stdOut, stdErr)
+      if ccusage.task ~= task then
+        -- Superseded by a newer fetch
+        return
+      end
       ccusage.task = nil
       local reopen = ccusage.reopen
       ccusage.reopen = nil
@@ -152,8 +169,10 @@ ccusage.update = function (reopen)
       if reopen then
         popupMenu()
       end
-  end, {"-lic", utils.shelljoin(ccusage.command())})
-  ccusage.task:start()
+  end, {"-lic", "exec " .. utils.shelljoin(ccusage.command())})
+  ccusage.startedAt = hs.timer.absoluteTime() / 1e9
+  ccusage.task = task
+  task:start()
 end
 
 -- Starts the ccusage menu bar widget
