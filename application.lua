@@ -11,6 +11,15 @@ local appID = function (app)
   return app:bundleID() or app:path() or app:name()
 end
 
+-- Finds a running application by exact appID; unlike
+-- hs.application.get/find, this never pattern-matches window titles,
+-- which could return an hs.window instead of an hs.application
+local getApp = function (id)
+  return hs.fnutils.find(hs.application.runningApplications(), function (app)
+      return appID(app) == id
+  end)
+end
+
 application.changeWatcher = hs.application.watcher.new(function (name, type, app)
     if type == watcher.terminated then
       for bundleID, reg in pairs(registry) do
@@ -55,7 +64,7 @@ application.onChange = function (bundleID, fn, terminatedOnStart)
 
   table.insert(reg.fns, fn)
 
-  local app = hs.application(bundleID)
+  local app = getApp(bundleID)
   if app then
     reg.app = app
     local name = app:name()
@@ -96,7 +105,7 @@ local launchAppInBackground = function (bundlePathOrID)
     bundleID = info.CFBundleIdentifier
   end
 
-  local app = hs.application.get(bundleID)
+  local app = getApp(bundleID)
   if app then
     return app
   end
@@ -136,7 +145,7 @@ application.launchInBackground = function (bundlePathOrID, fn, wait, waitForFirs
         timer:stop()
         fn(nil)
       else
-        local app = hs.application.get(bundleID)
+        local app = getApp(bundleID)
         if app and (not waitForFirstWindow or app:mainWindow()) then
           timer:stop()
           fn(app)
@@ -163,7 +172,7 @@ application.openInBackground = function (bundlePathOrID, wait, waitForFirstWindo
 
   local bundleID = app
   repeat
-    local app = hs.application.get(bundleID)
+    local app = getApp(bundleID)
     if app and (not waitForFirstWindow or app:mainWindow()) then
       return app
     end
