@@ -37,15 +37,17 @@ end
 
 local restarter
 
--- Enables or disable auto-restart when any of the *.lua files under
--- ~/.hammerspoon/ is modified
+-- Enables or disables auto-restart when Lua files under ~/.hammerspoon/ change,
+-- excluding dotfiles and files inside dot-directories.
 runtime.autorestart = function (flag)
   if flag then
     if restarter == nil then
-      restarter = hs.pathwatcher.new("./",
+      local root = hs.fs.pathToAbsolute(".")
+      restarter = hs.pathwatcher.new(root,
         function (files)
           for _, file in ipairs(files) do
-            if file:find("/[^./][^/]*%.lua$") then
+            local path = file:sub(#root + 1)
+            if path:match("%.lua$") and not path:find("/%.") then
               knu.runtime.restart()
               return
             end
